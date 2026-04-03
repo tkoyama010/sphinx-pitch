@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sphinx-pitch"
+version = "0.1.0"
+description = "A Sphinx extension for creating presentations with GitPitch-compatible syntax"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "sphinx-pitch authors"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: Sphinx :: Extension",
+    "Topic :: Documentation :: Sphinx",
+    "Topic :: Multimedia :: Graphics :: Presentation",
+]
+keywords = ["sphinx", "extension", "presentation", "slides", "gitpitch", "markdown"]
+requires-python = ">=3.7"
+dependencies = [
+    "sphinx>=3.0",
+    "docutils>=0.16",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=21.0",
+    "flake8>=3.8",
+    "mypy>=0.800",
+]
+
+[project.urls]
+"Bug Reports" = "https://github.com/tetsuo-koyama/sphinx-pitch/issues"
+Source = "https://github.com/tetsuo-koyama/sphinx-pitch"
+
+[tool.setuptools]
+packages = ["sphinx_pitch"]
+
+[tool.setuptools.package-data]
+sphinx_pitch = ["static/*.css"]
