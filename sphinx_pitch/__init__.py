@@ -482,17 +482,24 @@ class PitchDirective(SphinxDirective):
 
     def _parse_regular_content(self, parent, line):
         """Parse regular markdown/rst content."""
-        # Handle markdown headers
+        # Handle markdown headers - use strong paragraph instead of title
+        # (title nodes must be children of section nodes)
         if line.startswith("# "):
             title = line[2:]
-            node = nodes.title()
-            node += nodes.Text(title)
-            parent += node
+            para = nodes.paragraph()
+            para["classes"] = ["pitch-heading-1"]
+            strong = nodes.strong()
+            strong += nodes.Text(title)
+            para += strong
+            parent += para
         elif line.startswith("## "):
             title = line[3:]
-            node = nodes.subtitle()
-            node += nodes.Text(title)
-            parent += node
+            para = nodes.paragraph()
+            para["classes"] = ["pitch-heading-2"]
+            strong = nodes.strong()
+            strong += nodes.Text(title)
+            para += strong
+            parent += para
         else:
             # Regular paragraph
             para = nodes.paragraph()
