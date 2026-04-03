@@ -1,5 +1,5 @@
 Syntax Reference
-==============
+================
 
 This page provides detailed documentation for all sphinx-pitch syntax features.
 
@@ -229,7 +229,7 @@ The notes section starts with ``Note:`` and continues until the next slide or sp
 
 
 Complete Example
---------------
+----------------
 
 Here's a complete presentation example:
 

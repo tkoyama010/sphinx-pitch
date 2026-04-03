@@ -13,7 +13,6 @@ beautiful slide presentations using Sphinx with GitPitch-compatible syntax.
    quickstart
    syntax
    examples
-   demo_presentation
    api
 
 

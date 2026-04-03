@@ -1,3 +1,8 @@
+Live Demo Presentation
+========================
+
+This page demonstrates a complete sphinx-pitch presentation with all features.
+
 .. pitch::
    :theme: default
    :transition: slide

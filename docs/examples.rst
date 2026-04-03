@@ -8,11 +8,6 @@ Live Demo Presentation
 
 View a **live, working presentation** created with sphinx-pitch:
 
-.. toctree::
-   :maxdepth: 1
-
-   demo_presentation
-
 :doc:`View Live Demo <demo_presentation>`
 
 This demo showcases all major features including slides, grid layouts,
