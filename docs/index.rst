@@ -13,7 +13,21 @@ beautiful slide presentations using Sphinx with GitPitch-compatible syntax.
    quickstart
    syntax
    examples
+   demo_presentation
    api
+
+
+Live Demo
+---------
+
+See a **live presentation** created with sphinx-pitch:
+
+.. toctree::
+   :maxdepth: 1
+
+   demo_presentation
+
+:doc:`Click here to view the live demo presentation <demo_presentation>`
 
 
 Quick Start

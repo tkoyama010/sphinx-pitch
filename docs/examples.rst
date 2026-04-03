@@ -3,6 +3,21 @@ Examples
 
 This page provides complete working examples of sphinx-pitch presentations.
 
+Live Demo Presentation
+----------------------
+
+View a **live, working presentation** created with sphinx-pitch:
+
+.. toctree::
+   :maxdepth: 1
+
+   demo_presentation
+
+:doc:`View Live Demo <demo_presentation>`
+
+This demo showcases all major features including slides, grid layouts,
+code widgets, list widgets, math formulas, and speaker notes.
+
 Basic Presentation
 ------------------
 
@@ -138,7 +153,9 @@ Displaying mathematical content:
 Complete Demo Presentation
 --------------------------
 
-.. literalinclude:: ../examples/basic_presentation.rst
+Below is the source code for the :doc:`live demo presentation <demo_presentation>`:
+
+.. literalinclude:: demo_presentation.rst
    :language: rst
 
-View the source file: ``examples/basic_presentation.rst``
+View the :doc:`live presentation here <demo_presentation>`.

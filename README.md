@@ -187,9 +187,10 @@ pitch_transition = 'slide'
 
 ## Examples
 
-See the `examples/` directory for complete working examples:
+See the [documentation](https://sphinx-pitch.readthedocs.io/) for complete working examples:
 
-- `basic_presentation.rst` - Complete feature demonstration
+- [Live Demo](https://sphinx-pitch.readthedocs.io/en/latest/demo_presentation.html) - Complete feature demonstration
+- [Examples Page](https://sphinx-pitch.readthedocs.io/en/latest/examples.html) - More code examples
 
 ## GitPitch Compatibility
 
