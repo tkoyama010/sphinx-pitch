@@ -9,6 +9,7 @@ repos:
     rev: v1.20.0
     hooks:
       - id: mypy
+        additional_dependencies: [types-docutils]
   - repo: https://github.com/tkoyama010/standard-readme-pre-commit
     rev: v0.1.0
     hooks:

@@ -50,8 +50,8 @@ class PitchDirective(SphinxDirective):
         lines = list(self.content)
 
         # Split by ---
-        slides = []
-        current = []
+        slides: list[list[str]] = []
+        current: list[str] = []
         for line in lines:
             if line.strip() == "---":
                 if current:
