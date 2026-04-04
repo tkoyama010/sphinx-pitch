@@ -1,24 +1,29 @@
-"""
-sphinx-pitch: Minimal pitch directive for Reveal.js presentations
-"""
+"""sphinx-pitch: Minimal pitch directive for Reveal.js presentations."""
+
+from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING, ClassVar
+
 from docutils import nodes
-from docutils.parsers.rst import directives
-from sphinx.application import Sphinx
 from sphinx.util.docutils import SphinxDirective
+
+if TYPE_CHECKING:
+    from docutils.nodes import Node
+    from sphinx.application import Sphinx
+    from sphinx.writers.html import HTMLTranslator
 
 
 class PitchNode(nodes.General, nodes.Element):
-    pass
+    """Root node for pitch presentation deck."""
 
 
 class PitchSlideNode(nodes.General, nodes.Element):
-    pass
+    """Node representing a single pitch slide."""
 
 
 class PitchGridNode(nodes.General, nodes.Element):
-    pass
+    """Node representing a grid element within a slide."""
 
 
 # Regex to parse [drag=WIDTH HEIGHT, drop=POSITION, ...] syntax
@@ -30,10 +35,17 @@ DRAG_PATTERN = re.compile(
 
 
 class PitchDirective(SphinxDirective):
-    has_content = True
-    option_spec = {}
+    """Directive for creating pitch presentations."""
 
-    def run(self):
+    has_content = True
+    option_spec: ClassVar[dict[str, type]] = {}
+
+    def run(self) -> list[Node]:
+        """Process the pitch directive content and return nodes."""
+        return self._process_pitch()
+
+    def _process_pitch(self) -> list[Node]:
+        """Parse pitch content and build node tree."""
         pitch_node = PitchNode()
         lines = list(self.content)
 
@@ -51,135 +63,180 @@ class PitchDirective(SphinxDirective):
             slides.append(current)
 
         for i, slide_lines in enumerate(slides):
-            slide = PitchSlideNode()
-            slide["slide_id"] = f"slide-{i + 1}"
-
-            j = 0
-            while j < len(slide_lines):
-                line = slide_lines[j]
-                stripped = line.strip()
-
-                if not stripped:
-                    j += 1
-                    continue
-
-                # Check for [drag=...] syntax
-                drag_match = DRAG_PATTERN.match(stripped)
-                if drag_match:
-                    # Parse grid parameters
-                    width_val = drag_match.group(1)
-                    width_unit = drag_match.group(2) or "%"
-                    height_val = drag_match.group(3)
-                    height_unit = drag_match.group(4) or "%"
-
-                    # Build width/height with units
-                    width = f"{width_val}{width_unit}"
-                    height = f"{height_val}{height_unit}"
-
-                    # Parse drop - either keyword or coordinates
-                    drop_keyword = drag_match.group(5)
-                    drop_x_val = drag_match.group(6)
-                    drop_x_unit = drag_match.group(7) or "px"
-                    drop_y_val = drag_match.group(8)
-                    drop_y_unit = drag_match.group(9) or "px"
-
-                    if drop_keyword:
-                        # Using keyword position
-                        position = drop_keyword
-                        drop_x = None
-                        drop_y = None
-                    elif drop_x_val and drop_y_val:
-                        # Using pixel/percentage coordinates
-                        position = "coords"
-                        drop_x = f"{drop_x_val}{drop_x_unit}"
-                        drop_y = f"{drop_y_val}{drop_y_unit}"
-                    else:
-                        position = "left"
-                        drop_x = None
-                        drop_y = None
-
-                    flow = drag_match.group(10) or ""
-                    sync = drag_match.group(11) or ""
-                    bg = drag_match.group(12) or ""
-
-                    # Collect grid content until next drag directive or end of slide
-                    grid_content = []
-                    j += 1
-                    while j < len(slide_lines):
-                        next_line = slide_lines[j]
-                        if DRAG_PATTERN.match(
-                            next_line.strip()
-                        ) or next_line.strip().startswith("# "):
-                            break
-                        if next_line.strip() == "---":
-                            break
-                        grid_content.append(next_line)
-                        j += 1
-
-                    # Create grid node
-                    grid = PitchGridNode()
-                    grid["width"] = width
-                    grid["height"] = height
-                    grid["position"] = position
-                    grid["drop_x"] = drop_x or ""
-                    grid["drop_y"] = drop_y or ""
-                    grid["flow"] = flow
-                    grid["sync"] = sync
-                    grid["bg"] = bg
-
-                    # Process grid content
-                    for content_line in grid_content:
-                        content_stripped = content_line.strip()
-                        if not content_stripped:
-                            continue
-
-                        if content_stripped.startswith("## "):
-                            # Sub-heading
-                            para = nodes.paragraph()
-                            para["classes"] = ["pitch-subtitle"]
-                            strong = nodes.strong()
-                            strong += nodes.Text(content_stripped[3:])
-                            para += strong
-                            grid += para
-                        elif content_stripped.startswith("- "):
-                            # List item
-                            para = nodes.paragraph()
-                            para["classes"] = ["pitch-list-item"]
-                            para += nodes.Text("• " + content_stripped[2:])
-                            grid += para
-                        else:
-                            # Regular text
-                            para = nodes.paragraph()
-                            para += nodes.Text(content_stripped)
-                            grid += para
-
-                    slide += grid
-                elif stripped.startswith("# "):
-                    # Heading
-                    para = nodes.paragraph()
-                    para["classes"] = ["pitch-title"]
-                    strong = nodes.strong()
-                    strong += nodes.Text(stripped[2:])
-                    para += strong
-                    slide += para
-                    j += 1
-                else:
-                    # Regular text
-                    para = nodes.paragraph()
-                    para += nodes.Text(stripped)
-                    slide += para
-                    j += 1
-
+            slide = self._create_slide(i, slide_lines)
             pitch_node += slide
 
         return [pitch_node]
 
+    def _create_slide(self, slide_idx: int, slide_lines: list[str]) -> PitchSlideNode:
+        """Create a single slide from parsed lines."""
+        slide = PitchSlideNode()
+        slide["slide_id"] = f"slide-{slide_idx + 1}"
 
-def visit_pitch_node(self, node):
+        j = 0
+        while j < len(slide_lines):
+            line = slide_lines[j]
+            stripped = line.strip()
+
+            if not stripped:
+                j += 1
+                continue
+
+            j = self._process_slide_line(slide, slide_lines, j, stripped)
+
+        return slide
+
+    def _process_slide_line(
+        self,
+        slide: PitchSlideNode,
+        slide_lines: list[str],
+        idx: int,
+        stripped: str,
+    ) -> int:
+        """Process a single line within a slide."""
+        # Check for [drag=...] syntax
+        drag_match = DRAG_PATTERN.match(stripped)
+        if drag_match:
+            return self._process_drag_directive(slide, slide_lines, idx, drag_match)
+
+        if stripped.startswith("# "):
+            # Heading
+            para = nodes.paragraph()
+            para["classes"] = ["pitch-title"]
+            strong = nodes.strong()
+            strong += nodes.Text(stripped[2:])
+            para += strong
+            slide += para
+            return idx + 1
+
+        # Regular text
+        para = nodes.paragraph()
+        para += nodes.Text(stripped)
+        slide += para
+        return idx + 1
+
+    def _process_drag_directive(
+        self,
+        slide: PitchSlideNode,
+        slide_lines: list[str],
+        idx: int,
+        drag_match: re.Match[str],
+    ) -> int:
+        """Process a drag directive and create grid node."""
+        grid = self._create_grid_node(drag_match)
+        j = self._collect_grid_content(slide_lines, idx, grid)
+        self._process_grid_content(grid)
+        slide += grid
+        return j
+
+    def _create_grid_node(self, drag_match: re.Match[str]) -> PitchGridNode:
+        """Create grid node from drag directive match."""
+        width_val = drag_match.group(1)
+        width_unit = drag_match.group(2) or "%"
+        height_val = drag_match.group(3)
+        height_unit = drag_match.group(4) or "%"
+
+        width = f"{width_val}{width_unit}"
+        height = f"{height_val}{height_unit}"
+
+        drop_keyword = drag_match.group(5)
+        drop_x_val = drag_match.group(6)
+        drop_x_unit = drag_match.group(7) or "px"
+        drop_y_val = drag_match.group(8)
+        drop_y_unit = drag_match.group(9) or "px"
+
+        if drop_keyword:
+            position = drop_keyword
+            drop_x = None
+            drop_y = None
+        elif drop_x_val and drop_y_val:
+            position = "coords"
+            drop_x = f"{drop_x_val}{drop_x_unit}"
+            drop_y = f"{drop_y_val}{drop_y_unit}"
+        else:
+            position = "left"
+            drop_x = None
+            drop_y = None
+
+        grid = PitchGridNode()
+        grid["width"] = width
+        grid["height"] = height
+        grid["position"] = position
+        grid["drop_x"] = drop_x or ""
+        grid["drop_y"] = drop_y or ""
+        grid["flow"] = drag_match.group(10) or ""
+        grid["sync"] = drag_match.group(11) or ""
+        grid["bg"] = drag_match.group(12) or ""
+
+        return grid
+
+    def _collect_grid_content(
+        self,
+        slide_lines: list[str],
+        idx: int,
+        grid: PitchGridNode,
+    ) -> int:
+        """Collect content lines for grid node."""
+        grid_content = []
+        j = idx + 1
+        while j < len(slide_lines):
+            next_line = slide_lines[j]
+            if DRAG_PATTERN.match(next_line.strip()) or next_line.strip().startswith(
+                "# "
+            ):
+                break
+            if next_line.strip() == "---":
+                break
+            grid_content.append(next_line)
+            j += 1
+
+        grid["content"] = grid_content
+        return j
+
+    def _process_grid_content(self, grid: PitchGridNode) -> None:
+        """Process collected grid content and add to node."""
+        for content_line in grid.get("content", []):
+            content_stripped = content_line.strip()
+            if not content_stripped:
+                continue
+
+            if content_stripped.startswith("## "):
+                self._add_subheading(grid, content_stripped[3:])
+            elif content_stripped.startswith("- "):
+                self._add_list_item(grid, content_stripped[2:])
+            else:
+                self._add_text(grid, content_stripped)
+
+    def _add_subheading(self, grid: PitchGridNode, text: str) -> None:
+        """Add subheading paragraph to grid."""
+        para = nodes.paragraph()
+        para["classes"] = ["pitch-subtitle"]
+        strong = nodes.strong()
+        strong += nodes.Text(text)
+        para += strong
+        grid += para
+
+    def _add_list_item(self, grid: PitchGridNode, text: str) -> None:
+        """Add list item paragraph to grid."""
+        para = nodes.paragraph()
+        para["classes"] = ["pitch-list-item"]
+        para += nodes.Text("• " + text)
+        grid += para
+
+    def _add_text(self, grid: PitchGridNode, text: str) -> None:
+        """Add text paragraph to grid."""
+        para = nodes.paragraph()
+        para += nodes.Text(text)
+        grid += para
+
+
+def visit_pitch_node(self: HTMLTranslator, _node: Node) -> None:
+    """Visit pitch node and start HTML container."""
     self.body.append('<div class="pitch-deck">')
 
 
-def depart_pitch_node(self, node):
+def depart_pitch_node(self: HTMLTranslator, _node: Node) -> None:
+    """Depart pitch node and add navigation script."""
     self.body.append(
         """
 <script>
@@ -201,29 +258,31 @@ show();
     )
 
 
-def visit_pitch_slide_node(self, node):
+def visit_pitch_slide_node(self: HTMLTranslator, node: PitchSlideNode) -> None:
+    """Visit pitch slide node and start section."""
     self.body.append(f'<section class="pitch-slide" id="{node["slide_id"]}">')
 
 
-def depart_pitch_slide_node(self, node):
+def depart_pitch_slide_node(self: HTMLTranslator, _node: Node) -> None:
+    """Depart pitch slide node and close section."""
     self.body.append("</section>")
 
 
-def visit_pitch_grid_node(self, node):
+def visit_pitch_grid_node(self: HTMLTranslator, node: PitchGridNode) -> None:
+    """Visit pitch grid node and create positioned div."""
     width = node.get("width", "50%")
     height = node.get("height", "50%")
     position = node.get("position", "left")
     drop_x = node.get("drop_x", "")
     drop_y = node.get("drop_y", "")
     flow = node.get("flow", "")
-    sync = node.get("sync", "")
     bg = node.get("bg", "")
 
     # Build style attribute
     styles = [
         f"width: {width}",
         f"height: {height}",
-        f"position: absolute",
+        "position: absolute",
     ]
 
     # Calculate position
@@ -262,11 +321,13 @@ def visit_pitch_grid_node(self, node):
     self.body.append(f'<div class="pitch-grid" style="{style_str}">')
 
 
-def depart_pitch_grid_node(self, node):
+def depart_pitch_grid_node(self: HTMLTranslator, _node: Node) -> None:
+    """Depart pitch grid node and close div."""
     self.body.append("</div>")
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> dict[str, str | bool]:
+    """Set up the sphinx-pitch extension."""
     app.add_directive("pitch", PitchDirective)
     app.add_node(
         PitchNode,
