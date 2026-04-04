@@ -19,6 +19,84 @@
     box-sizing: border-box;
 }
 
+/* Grid overlay with lines and rulers */
+.pitch-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.pitch-grid-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent calc(var(--grid-size) - 1px), rgba(255,255,255,0.3) calc(var(--grid-size) - 1px), rgba(255,255,255,0.3) var(--grid-size)),
+        repeating-linear-gradient(90deg, transparent, transparent calc(var(--grid-size) - 1px), rgba(255,255,255,0.3) calc(var(--grid-size) - 1px), rgba(255,255,255,0.3) var(--grid-size));
+    background-size: 100% 100%;
+}
+
+/* Ruler X (top) */
+.pitch-grid-ruler-x {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #fff;
+    overflow: hidden;
+}
+
+.pitch-grid-ruler-x::before {
+    content: '';
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(90deg, 
+        transparent 0px, 
+        transparent calc(var(--grid-size) - 1px), 
+        rgba(255,255,255,0.5) calc(var(--grid-size) - 1px), 
+        rgba(255,255,255,0.5) var(--grid-size));
+}
+
+/* Ruler Y (left) */
+.pitch-grid-ruler-y {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    font-size: 10px;
+    color: #fff;
+    overflow: hidden;
+}
+
+.pitch-grid-ruler-y::before {
+    content: '';
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, 
+        transparent 0px, 
+        transparent calc(var(--grid-size) - 1px), 
+        rgba(255,255,255,0.5) calc(var(--grid-size) - 1px), 
+        rgba(255,255,255,0.5) var(--grid-size));
+}
+
 .pitch-title {
     font-size: 2em;
     font-weight: bold;
