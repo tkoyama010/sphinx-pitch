@@ -1,5 +1,5 @@
-"""
-sphinx-pitch
+"""sphinx-pitch.
+
 ~~~~~~~~~~~~
 
 A Sphinx extension for creating presentations with GitPitch-compatible syntax.
