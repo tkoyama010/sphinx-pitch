@@ -60,8 +60,6 @@ class PitchDirective(SphinxDirective):
         for i, slide_lines in enumerate(slides):
             slide = PitchSlideNode()
             slide["slide_id"] = f"slide-{i + 1}"
-            # Pass grid size to each slide
-            slide["grid"] = grid_size
 
             j = 0
             while j < len(slide_lines):
@@ -185,7 +183,16 @@ class PitchDirective(SphinxDirective):
 
 
 def visit_pitch_node(self, node):
-    self.body.append('<div class="pitch-deck">')
+    grid_size = node.get("grid", "")
+    grid_html = ""
+    if grid_size:
+        # Add grid overlay at deck level (not affected by slide visibility)
+        grid_html = f"""<div class="pitch-grid-overlay" style="--grid-size: {grid_size}px;">
+            <div class="pitch-grid-lines"></div>
+            <div class="pitch-grid-ruler-x"></div>
+            <div class="pitch-grid-ruler-y"></div>
+        </div>"""
+    self.body.append(f'<div class="pitch-deck">{grid_html}')
 
 
 def depart_pitch_node(self, node):
@@ -211,20 +218,7 @@ show();
 
 
 def visit_pitch_slide_node(self, node):
-    # Add grid overlay if grid size is configured
-    grid_size = node.get("grid", "")
-    if grid_size:
-        # Calculate number of grid lines
-        grid_html = f"""<div class="pitch-grid-overlay" style="--grid-size: {grid_size}px;">
-            <div class="pitch-grid-lines"></div>
-            <div class="pitch-grid-ruler-x"></div>
-            <div class="pitch-grid-ruler-y"></div>
-        </div>"""
-        self.body.append(
-            f'<section class="pitch-slide" id="{node["slide_id"]}">{grid_html}'
-        )
-    else:
-        self.body.append(f'<section class="pitch-slide" id="{node["slide_id"]}">')
+    self.body.append(f'<section class="pitch-slide" id="{node["slide_id"]}">')
 
 
 def depart_pitch_slide_node(self, node):
