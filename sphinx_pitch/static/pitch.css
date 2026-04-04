@@ -8,6 +8,11 @@
     overflow: hidden;
 }
 
+/* Grid background pattern */
+.pitch-deck[style*="background-image"] {
+    position: relative;
+}
+
 .pitch-slide {
     position: absolute;
     top: 0;

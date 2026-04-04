@@ -184,120 +184,38 @@ class PitchDirective(SphinxDirective):
 
 def visit_pitch_node(self, node):
     grid_size = node.get("grid", "")
-    grid_html = ""
+    grid_style = ""
     if grid_size:
-        # Add simple container for grid (JavaScript will populate it)
-        grid_html = '<div class="pitch-grid-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>'
-    self.body.append(f'<div class="pitch-deck">{grid_html}')
+        # Create CSS grid with background image pattern
+        grid_style = f""" style="background-image: 
+            linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px),
+            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px); 
+            background-size: {grid_size}px {grid_size}px, {grid_size}px {grid_size}px, 100px 100px, 100px 100px;"""
+    self.body.append(f'<div class="pitch-deck"{grid_style}>')
 
 
 def depart_pitch_node(self, node):
-    grid_size = node.get("grid", "")
-    grid_script = ""
-    if grid_size:
-        # Add JavaScript to dynamically generate grid with numbers
-        grid_script = f"""
+    self.body.append(
+        """
 <script>
-(function(){{
-function initGrid(){{
-var deck=document.querySelector('.pitch-deck');
-var gridOverlay=deck.querySelector('.pitch-grid-overlay');
-if(gridOverlay){{
-var gridSize={grid_size};
-var rect=deck.getBoundingClientRect();
-var width=Math.floor(rect.width);
-var height=Math.floor(rect.height);
-var svgNS="http://www.w3.org/2000/svg";
-var svg=document.createElementNS(svgNS,"svg");
-svg.setAttribute("width",width);
-svg.setAttribute("height",height);
-svg.style.position="absolute";
-svg.style.top="0";
-svg.style.left="0";
-svg.style.pointerEvents="none";
-// Background for rulers (draw first so it's behind grid lines)
-var rulerBg=document.createElementNS(svgNS,"rect");
-rulerBg.setAttribute("x",0);
-rulerBg.setAttribute("y",0);
-rulerBg.setAttribute("width",width);
-rulerBg.setAttribute("height",20);
-rulerBg.setAttribute("fill","rgba(0,0,0,0.8)");
-svg.appendChild(rulerBg);
-var rulerBg2=document.createElementNS(svgNS,"rect");
-rulerBg2.setAttribute("x",0);
-rulerBg2.setAttribute("y",0);
-rulerBg2.setAttribute("width",50);
-rulerBg2.setAttribute("height",height);
-rulerBg2.setAttribute("fill","rgba(0,0,0,0.8)");
-svg.appendChild(rulerBg2);
-// Grid lines
-for(var x=0;x<=width;x+=gridSize){{
-var line=document.createElementNS(svgNS,"line");
-line.setAttribute("x1",x);
-line.setAttribute("y1",20);
-line.setAttribute("x2",x);
-line.setAttribute("y2",height);
-line.setAttribute("stroke","rgba(255,255,255,0.5)");
-line.setAttribute("stroke-width","1");
-svg.appendChild(line);
-// X-axis numbers
-if(x>0 && x%100===0){{
-var text=document.createElementNS(svgNS,"text");
-text.setAttribute("x",x);
-text.setAttribute("y",15);
-text.setAttribute("text-anchor","middle");
-text.setAttribute("fill","#fff");
-text.setAttribute("font-size","12");
-text.setAttribute("font-weight","bold");
-text.textContent=x;
-svg.appendChild(text);
-}}
-}}
-for(var y=20;y<=height;y+=gridSize){{
-var line=document.createElementNS(svgNS,"line");
-line.setAttribute("x1",50);
-line.setAttribute("y1",y);
-line.setAttribute("x2",width);
-line.setAttribute("y2",y);
-line.setAttribute("stroke","rgba(255,255,255,0.5)");
-line.setAttribute("stroke-width","1");
-svg.appendChild(line);
-// Y-axis numbers
-if(y>0 && y%100===0){{
-var text=document.createElementNS(svgNS,"text");
-text.setAttribute("x",25);
-text.setAttribute("y",y+4);
-text.setAttribute("text-anchor","middle");
-text.setAttribute("fill","#fff");
-text.setAttribute("font-size","12");
-text.setAttribute("font-weight","bold");
-text.textContent=y;
-svg.appendChild(text);
-}}
-}}
-gridOverlay.appendChild(svg);
-}}
-}}
-if(document.readyState==='complete'){{initGrid();}}else{{window.addEventListener('load',initGrid);}}
-}})();
-</script>"""
-    self.body.append(f"""
-<script>
-(function(){{
+(function(){
 var deck=document.currentScript.closest('.pitch-deck');
 var slides=deck.querySelectorAll('.pitch-slide');
 var current=0;
-function show(){{slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}}
-function next(){{if(current<slides.length-1){{current++;show();}}}}
-function prev(){{if(current>0){{current--;show();}}}}
-document.addEventListener('keydown',function(e){{
+function show(){slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}
+function next(){if(current<slides.length-1){current++;show();}}
+function prev(){if(current>0){current--;show();}}
+document.addEventListener('keydown',function(e){
 if(e.key==='ArrowRight'||e.key===' ')next();
 if(e.key==='ArrowLeft')prev();
-}});
+});
 show();
-}})();
-</script>{grid_script}
-</div>""")
+})();
+</script>
+</div>"""
+    )
 
 
 def visit_pitch_slide_node(self, node):
