@@ -50,13 +50,6 @@ class PitchDirective(SphinxDirective):
         if current:
             slides.append(current)
 
-        # Get grid size from config (conf.py)
-        config = self.env.config
-        grid_size = getattr(config, "pitch_grid_size", "")
-
-        # Store grid_size in pitch_node for use in visit_pitch_node
-        pitch_node["grid"] = grid_size
-
         for i, slide_lines in enumerate(slides):
             slide = PitchSlideNode()
             slide["slide_id"] = f"slide-{i + 1}"
@@ -183,113 +176,29 @@ class PitchDirective(SphinxDirective):
 
 
 def visit_pitch_node(self, node):
-    grid_size = node.get("grid", "")
-    if grid_size:
-        # Add data-grid attribute for full-page grid
-        self.body.append(f'<div class="pitch-deck" data-grid="{grid_size}">')
-    else:
-        self.body.append('<div class="pitch-deck">')
+    self.body.append('<div class="pitch-deck">')
 
 
 def depart_pitch_node(self, node):
-    grid_size = node.get("grid", "")
-    grid_script = ""
-    if grid_size:
-        # Add JavaScript to draw grid numbers
-        grid_script = f"""
+    self.body.append(
+        """
 <script>
-(function(){{
-function drawGridNumbers(){{
-var deck=document.querySelector('.pitch-deck[data-grid="{grid_size}"]');
-if(!deck) return;
-// Remove existing numbers container
-var existing=deck.querySelector('.pitch-grid-numbers');
-if(existing) existing.remove();
-// Create container positioned relative to deck
-var container=document.createElement('div');
-container.className='pitch-grid-numbers';
-// Get deck's actual dimensions
-var rect=deck.getBoundingClientRect();
-var width=Math.floor(rect.width);
-var height=Math.floor(rect.height);
-var gridSize={grid_size};
-// Create SVG for numbers matching deck dimensions
-var svgNS='http://www.w3.org/2000/svg';
-var svg=document.createElementNS(svgNS,'svg');
-svg.setAttribute('width',width);
-svg.setAttribute('height',height);
-svg.style.position='absolute';
-svg.style.top='0';
-svg.style.left='0';
-// Ruler backgrounds
-var rulerTop=document.createElementNS(svgNS,'rect');
-rulerTop.setAttribute('x',0);
-rulerTop.setAttribute('y',0);
-rulerTop.setAttribute('width',width);
-rulerTop.setAttribute('height',20);
-rulerTop.setAttribute('fill','rgba(0,0,0,0.8)');
-svg.appendChild(rulerTop);
-var rulerLeft=document.createElementNS(svgNS,'rect');
-rulerLeft.setAttribute('x',0);
-rulerLeft.setAttribute('y',0);
-rulerLeft.setAttribute('width',50);
-rulerLeft.setAttribute('height',height);
-rulerLeft.setAttribute('fill','rgba(0,0,0,0.8)');
-svg.appendChild(rulerLeft);
-// X-axis numbers (every 100px)
-for(var x=0;x<=width;x+=gridSize){{
-if(x>0 && x%100===0){{
-var text=document.createElementNS(svgNS,'text');
-text.setAttribute('x',x);
-text.setAttribute('y',15);
-text.setAttribute('text-anchor','middle');
-text.setAttribute('fill','#fff');
-text.setAttribute('font-size','11');
-text.setAttribute('font-weight','bold');
-text.textContent=x;
-svg.appendChild(text);
-}}
-}}
-// Y-axis numbers (every 100px)
-for(var y=0;y<=height;y+=gridSize){{
-if(y>0 && y%100===0){{
-var text=document.createElementNS(svgNS,'text');
-text.setAttribute('x',25);
-text.setAttribute('y',y+4);
-text.setAttribute('text-anchor','middle');
-text.setAttribute('fill','#fff');
-text.setAttribute('font-size','11');
-text.setAttribute('font-weight','bold');
-text.textContent=y;
-svg.appendChild(text);
-}}
-}}
-container.appendChild(svg);
-deck.appendChild(container);
-}}
-// Draw immediately and on resize
-if(document.readyState==='complete'){{drawGridNumbers();}}else{{window.addEventListener('load',drawGridNumbers);}}
-window.addEventListener('resize',drawGridNumbers);
-}})();
-</script>"""
-
-    self.body.append(f"""
-<script>
-(function(){{
+(function(){
 var deck=document.currentScript.closest('.pitch-deck');
 var slides=deck.querySelectorAll('.pitch-slide');
 var current=0;
-function show(){{slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}}
-function next(){{if(current<slides.length-1){{current++;show();}}}}
-function prev(){{if(current>0){{current--;show();}}}}
-document.addEventListener('keydown',function(e){{
+function show(){slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}
+function next(){if(current<slides.length-1){current++;show();}}
+function prev(){if(current>0){current--;show();}}
+document.addEventListener('keydown',function(e){
 if(e.key==='ArrowRight'||e.key===' ')next();
 if(e.key==='ArrowLeft')prev();
-}});
+});
 show();
-}})();
-</script>{grid_script}
-</div>""")
+})();
+</script>
+</div>"""
+    )
 
 
 def visit_pitch_slide_node(self, node):
@@ -372,6 +281,4 @@ def setup(app: Sphinx):
         html=(visit_pitch_grid_node, depart_pitch_grid_node),
     )
     app.add_css_file("pitch.css")
-    # Add config value for grid size (can be set in conf.py)
-    app.add_config_value("pitch_grid_size", "", "env")
     return {"version": "0.1.0", "parallel_read_safe": True, "parallel_write_safe": True}

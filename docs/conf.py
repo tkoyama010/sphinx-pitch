@@ -14,6 +14,3 @@ html_static_path = [os.path.join(os.path.dirname(sphinx_pitch.__file__), "static
 
 # Static path for revealjs builder (sphinx-revealjs uses this instead of html_static_path)
 revealjs_static_path = html_static_path.copy()
-
-# Grid size for pitch presentations (in pixels)
-pitch_grid_size = 20
