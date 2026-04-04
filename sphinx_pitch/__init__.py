@@ -184,8 +184,8 @@ class PitchDirective(SphinxDirective):
 
 def visit_pitch_node(self, node):
     grid_size = node.get("grid", "")
-    # Add data-grid attribute when grid size is configured
     if grid_size:
+        # Add data-grid attribute for full-page grid
         self.body.append(f'<div class="pitch-deck" data-grid="{grid_size}">')
     else:
         self.body.append('<div class="pitch-deck">')
@@ -205,14 +205,15 @@ if(!deck) return;
 // Remove existing numbers container
 var existing=deck.querySelector('.pitch-grid-numbers');
 if(existing) existing.remove();
-// Create container
+// Create container positioned relative to deck
 var container=document.createElement('div');
 container.className='pitch-grid-numbers';
+// Get deck's actual dimensions
 var rect=deck.getBoundingClientRect();
 var width=Math.floor(rect.width);
 var height=Math.floor(rect.height);
 var gridSize={grid_size};
-// Create SVG for numbers
+// Create SVG for numbers matching deck dimensions
 var svgNS='http://www.w3.org/2000/svg';
 var svg=document.createElementNS(svgNS,'svg');
 svg.setAttribute('width',width);

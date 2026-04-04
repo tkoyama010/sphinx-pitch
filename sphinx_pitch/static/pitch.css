@@ -1,15 +1,13 @@
 /* Minimal pitch presentation styles */
 .pitch-deck {
     position: relative;
-    width: 100%;
-    height: 100vh; /* Full viewport height */
-    min-height: 400px;
-    background: #1a1a2e;
-    border-radius: 8px;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
     overflow: hidden;
 }
 
-/* Grid overlay covering entire deck */
+/* Grid overlay covering entire slide */
 .pitch-deck[data-grid]::before {
     content: '';
     position: absolute;
@@ -27,7 +25,7 @@
     background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
 }
 
-/* Container for grid numbers (created by JavaScript) */
+/* Container for grid numbers */
 .pitch-grid-numbers {
     position: absolute;
     top: 0;
@@ -39,9 +37,7 @@
 }
 
 .pitch-slide {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
     height: 100%;
     padding: 40px;
