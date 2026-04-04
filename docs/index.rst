@@ -11,13 +11,13 @@ Hello World
 
    # Grid Layout Example
    
-   [drag=50 50, drop=left]
+   [drag=48 80, drop=left, bg=#e74c3c]
    
    ## Left Content
    
    This content appears on the left side
    
-   [drag=50 50, drop=right]
+   [drag=48 80, drop=right, bg=#3498db]
    
    ## Right Content
    
@@ -27,7 +27,7 @@ Hello World
 
    # Advanced Layout
    
-   [drag=70 100, drop=left, flow=stack, sync=true]
+   [drag=65 90, drop=left, flow=stack, sync=true, bg=#2ecc71]
    
    ## Main Content Area
    
@@ -35,7 +35,7 @@ Hello World
    - Feature 2
    - Feature 3
    
-   [drag=30 100, drop=right]
+   [drag=33 90, drop=right, bg=#9b59b6]
    
    ## Sidebar
    
