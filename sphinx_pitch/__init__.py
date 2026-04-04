@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
@@ -195,7 +195,8 @@ class PitchDirective(SphinxDirective):
 
     def _process_grid_content(self, grid: PitchGridNode) -> None:
         """Process collected grid content and add to node."""
-        for content_line: str in grid.get("content", []):
+        for raw_content_line in grid.get("content", []):
+            content_line: str = cast(str, raw_content_line)
             content_stripped: str = content_line.strip()
             if not content_stripped:
                 continue
