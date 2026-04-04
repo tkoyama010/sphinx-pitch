@@ -50,8 +50,8 @@ class PitchDirective(SphinxDirective):
         lines = list(self.content)
 
         # Split by ---
-        slides = []
-        current = []
+        slides: list[list[str]] = []
+        current: list[str] = []
         for line in lines:
             if line.strip() == "---":
                 if current:
@@ -195,8 +195,9 @@ class PitchDirective(SphinxDirective):
 
     def _process_grid_content(self, grid: PitchGridNode) -> None:
         """Process collected grid content and add to node."""
-        for content_line in grid.get("content", []):
-            content_stripped = content_line.strip()
+        content: list[str] = grid.get("content", [])
+        for content_line in content:
+            content_stripped: str = content_line.strip()
             if not content_stripped:
                 continue
 
