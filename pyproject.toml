@@ -52,3 +52,7 @@ packages = ["sphinx_pitch"]
 
 [tool.setuptools.package-data]
 sphinx_pitch = ["static/*.css"]
+
+[tool.ruff.lint]
+extend-select = ["ALL"]
+ignore = ["COM812", "D203", "D212", "ISC001"]
