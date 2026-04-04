@@ -8,14 +8,14 @@
    
    left side with grid
    
-   [drag=48% 40%, drop=0px 100px, bg=#3498db]
+   [drag=48% 40%, drop=400px 100px, bg=#3498db]
    
    ## Right Content
    
    right side
    
-   [drag=200px 150px, drop=100px 50px, bg=#2ecc71]
+   [drag=300px 250px, drop=100px 200px, bg=#2ecc71]
    
    ## Free Position
    
-   This content is at 100px 50px
+   This content is at 100px 200px
