@@ -3,6 +3,7 @@ sphinx-pitch: Minimal pitch directive for Reveal.js presentations
 """
 
 import re
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.application import Sphinx
@@ -223,7 +224,7 @@ def visit_pitch_grid_node(self, node):
     styles = [
         f"width: {width}",
         f"height: {height}",
-        f"position: absolute",
+        "position: absolute",
     ]
 
     # Calculate position
