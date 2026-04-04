@@ -1,4 +1,5 @@
-"""sphinx-pitch.
+"""
+sphinx-pitch.
 
 ~~~~~~~~~~~~
 
