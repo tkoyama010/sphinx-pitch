@@ -1,177 +1,97 @@
 """
 sphinx-pitch: A Sphinx extension for creating presentations like GitPitch.
 
-This extension provides directives and roles compatible with GitPitch markdown syntax.
-GitPitch uses PITCHME.md files with special syntax for creating slide presentations.
-
-Main features:
-- pitch directive: Main container for slide presentations
-- Support for GitPitch grid layout syntax [drag=X, drop=Y, fit=Z]
-- Support for GitPitch widgets (@code, @ul, @ol, @math, @gist, @diff, @mermaid)
-- Slide delimiter support (---)
-- Code presenting with annotations
-- Speaker notes
+This extension provides directives compatible with GitPitch markdown syntax
+for creating slide presentations using sphinx-revealjs.
 """
 
-import html
 import re
 from docutils import nodes
-from docutils.parsers.rst import directives, Directive
-from docutils.statemachine import ViewList
+from docutils.parsers.rst import directives
 from sphinx.application import Sphinx
 from sphinx.util.docutils import SphinxDirective
 
 
 class PitchNode(nodes.General, nodes.Element):
-    """Node representing a pitch/presentation slide deck."""
+    """Node representing a pitch/presentation container."""
 
     pass
 
 
-class SlideNode(nodes.General, nodes.Element):
-    """Node representing an individual slide."""
+class PitchSlideNode(nodes.General, nodes.Element):
+    """Node representing an individual slide section."""
 
     pass
 
 
-class GridBlockNode(nodes.General, nodes.Element):
-    """Node representing a grid layout block with drag/drop positioning."""
+class PitchFloatNode(nodes.General, nodes.Element):
+    """Node representing a positioned floating block (GitPitch grid layout)."""
 
     pass
 
 
-class CodeWidgetNode(nodes.General, nodes.Element):
-    """Node representing a @code widget."""
+class PitchCodeNode(nodes.General, nodes.Element):
+    """Node representing a code block widget."""
 
     pass
 
 
-class ListWidgetNode(nodes.General, nodes.Element):
-    """Node representing @ul or @ol widget."""
+class PitchListNode(nodes.General, nodes.Element):
+    """Node representing a list widget (@ul or @ol)."""
 
     pass
 
 
-class MathWidgetNode(nodes.General, nodes.Element):
-    """Node representing @math widget."""
+class PitchMathNode(nodes.General, nodes.Element):
+    """Node representing a math formula widget."""
 
     pass
 
 
-class NoteNode(nodes.General, nodes.Element):
+class PitchNoteNode(nodes.General, nodes.Element):
     """Node representing speaker notes."""
 
     pass
 
 
+# Visitor functions for HTML output (standard Sphinx HTML)
 def visit_pitch_node(self, node):
-    """Generate HTML output for pitch node with slideshow container."""
     self.body.append('<div class="pitch-presentation">')
-    self.body.append('<div class="pitch-slides-container">')
 
 
 def depart_pitch_node(self, node):
-    """Close pitch node and add navigation controls."""
-    self.body.append("</div>")  # Close slides container
-
-    # Add navigation controls
-    self.body.append("""
-<div class="pitch-nav">
-    <button class="pitch-prev" onclick="pitchPrevSlide(this)">← Previous</button>
-    <span class="pitch-slide-counter"><span class="pitch-current">1</span> / <span class="pitch-total">1</span></span>
-    <button class="pitch-next" onclick="pitchNextSlide(this)">Next →</button>
-</div>
-<script>
-(function() {
-    function initPitchPresentation(container) {
-        const slides = container.querySelectorAll('.pitch-slide');
-        const totalSlides = slides.length;
-        let currentSlide = 0;
-        
-        if (totalSlides === 0) return;
-        
-        // Show first slide
-        slides[0].classList.add('active');
-        
-        // Update counter
-        const counter = container.parentElement.querySelector('.pitch-slide-counter');
-        if (counter) {
-            counter.querySelector('.pitch-total').textContent = totalSlides;
-            updateCounter();
-        }
-        
-        function updateCounter() {
-            if (counter) {
-                counter.querySelector('.pitch-current').textContent = currentSlide + 1;
-            }
-            const prevBtn = container.parentElement.querySelector('.pitch-prev');
-            const nextBtn = container.parentElement.querySelector('.pitch-next');
-            if (prevBtn) prevBtn.disabled = currentSlide === 0;
-            if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
-        }
-        
-        window.pitchNextSlide = function(btn) {
-            if (currentSlide < totalSlides - 1) {
-                slides[currentSlide].classList.remove('active');
-                currentSlide++;
-                slides[currentSlide].classList.add('active');
-                updateCounter();
-            }
-        };
-        
-        window.pitchPrevSlide = function(btn) {
-            if (currentSlide > 0) {
-                slides[currentSlide].classList.remove('active');
-                currentSlide--;
-                slides[currentSlide].classList.add('active');
-                updateCounter();
-            }
-        };
-    }
-    
-    // Initialize all presentations
-    document.querySelectorAll('.pitch-slides-container').forEach(initPitchPresentation);
-})();
-</script>
-""")
-    self.body.append("</div>")  # Close presentation
+    self.body.append("</div>")
 
 
-def visit_slide_node(self, node):
-    """Generate HTML output for slide node."""
+def visit_pitch_slide_node(self, node):
     slide_id = node.get("slide_id", "")
-    classes = ["pitch-slide"]
-    if node.get("classes"):
-        classes.extend(node.get("classes"))
-
-    class_attr = " ".join(classes)
-    self.body.append(f'<section class="{class_attr}" id="{slide_id}">')
+    self.body.append(f'<section class="pitch-slide" id="{slide_id}">')
 
 
-def depart_slide_node(self, node):
+def depart_pitch_slide_node(self, node):
     self.body.append("</section>")
 
 
-def visit_grid_block_node(self, node):
-    """Generate HTML output for grid block node with GitPitch-style positioning."""
-    drag = node.get("drag", "")
-    drop = node.get("drop", "")
-    fit = node.get("fit", "")
-    flow = node.get("flow", "")
-    bg = node.get("bg", "")
+def visit_pitch_float_node(self, node):
+    """Output GitPitch-style grid layout block."""
+    attrs = node.get("attrs", {})
 
     styles = ["position: absolute;"]
     classes = ["pitch-grid-block"]
 
     # Parse drag (width height)
+    drag = attrs.get("drag", "")
     if drag:
-        drag_parts = drag.split()
-        if len(drag_parts) >= 1:
-            styles.append(f"width: {drag_parts[0]};")
-        if len(drag_parts) >= 2:
-            styles.append(f"height: {drag_parts[1]};")
+        parts = drag.split()
+        if len(parts) >= 1:
+            w = parts[0]
+            styles.append(f"width: {w}{'%' if w.isdigit() else ''};")
+        if len(parts) >= 2:
+            h = parts[1]
+            styles.append(f"height: {h}{'%' if h.isdigit() else ''};")
 
-    # Parse drop (x y or named position)
+    # Parse drop (position)
+    drop = attrs.get("drop", "")
     if drop:
         if drop in [
             "center",
@@ -186,18 +106,23 @@ def visit_grid_block_node(self, node):
         ]:
             classes.append(f"drop-{drop}")
         else:
-            drop_parts = drop.split()
-            if len(drop_parts) >= 1:
-                styles.append(f"left: {drop_parts[0]};")
-            if len(drop_parts) >= 2:
-                styles.append(f"top: {drop_parts[1]};")
+            parts = drop.split()
+            if len(parts) >= 1:
+                x = parts[0]
+                styles.append(f"left: {x}{'%' if x.isdigit() else ''};")
+            if len(parts) >= 2:
+                y = parts[1]
+                styles.append(f"top: {y}{'%' if y.isdigit() else ''};")
 
+    fit = attrs.get("fit", "")
     if fit:
         styles.append(f"--pitch-fit: {fit};")
 
+    bg = attrs.get("bg", "")
     if bg:
         styles.append(f"background-color: {bg};")
 
+    flow = attrs.get("flow", "")
     if flow:
         classes.append(f"flow-{flow}")
 
@@ -207,59 +132,43 @@ def visit_grid_block_node(self, node):
     self.body.append(f'<div class="{class_attr}" style="{style_attr}">')
 
 
-def depart_grid_block_node(self, node):
+def depart_pitch_float_node(self, node):
     self.body.append("</div>")
 
 
-def visit_note_node(self, node):
-    """Generate HTML output for speaker notes."""
-    self.body.append('<aside class="pitch-notes" style="display: none;">')
+def visit_pitch_code_node(self, node):
+    import html as html_module
 
-
-def depart_note_node(self, node):
-    self.body.append("</aside>")
-
-
-def visit_code_widget_node(self, node):
-    """Generate HTML output for code widget."""
     attrs = node.get("attrs", {})
     language = attrs.get("language", "text")
     content = node.get("content", "")
 
-    # Escape HTML in code content
-    import html
-
-    escaped_content = html.escape(content)
-
+    escaped = html_module.escape(content)
     self.body.append(
-        f'<div class="pitch-code-widget" data-language="{language}"><pre><code class="language-{language}">'
+        f'<div class="pitch-code-widget"><pre><code class="language-{language}">{escaped}</code></pre></div>'
     )
-    if escaped_content:
-        self.body.append(escaped_content)
 
 
-def depart_code_widget_node(self, node):
-    self.body.append("</code></pre></div>")
+def depart_pitch_code_node(self, node):
+    pass
 
 
-def visit_list_widget_node(self, node):
-    """Generate HTML output for list widget."""
+def visit_pitch_list_node(self, node):
     list_type = node.get("list_type", "ul")
     classes = node.get("classes", [])
-    class_attr = " ".join(classes)
+    class_attr = " ".join(classes + ["pitch-list-widget"])
 
     if list_type == "ol":
-        self.body.append(f'<ol class="pitch-list-widget {class_attr}">')
+        self.body.append(f'<ol class="{class_attr}">')
     else:
-        self.body.append(f'<ul class="pitch-list-widget {class_attr}">')
+        self.body.append(f'<ul class="{class_attr}">')
 
-    # Output list items directly
     items = node.get("items", [])
     for item in items:
         self.body.append(f"<li>{item}</li>")
 
 
-def depart_list_widget_node(self, node):
+def depart_pitch_list_node(self, node):
     list_type = node.get("list_type", "ul")
     if list_type == "ol":
         self.body.append("</ol>")
@@ -267,55 +176,53 @@ def depart_list_widget_node(self, node):
         self.body.append("</ul>")
 
 
-def visit_math_widget_node(self, node):
-    """Generate HTML output for math widget."""
+def visit_pitch_math_node(self, node):
     self.body.append('<div class="pitch-math-widget">')
+    content = node.get("content", "")
+    if content:
+        self.body.append(content)
 
 
-def depart_math_widget_node(self, node):
+def depart_pitch_math_node(self, node):
     self.body.append("</div>")
+
+
+def visit_pitch_note_node(self, node):
+    self.body.append('<aside class="pitch-notes" style="display: none;">')
+    content = node.get("content", "")
+    if content:
+        self.body.append(content)
+
+
+def depart_pitch_note_node(self, node):
+    self.body.append("</aside>")
 
 
 class PitchDirective(SphinxDirective):
     """
     Main directive for creating pitch presentations.
 
-    This directive processes GitPitch-style markdown syntax including:
-    - Slide delimiters (---)
-    - Grid layout blocks [drag=X, drop=Y, fit=Z]
-    - Widgets (@code, @ul, @ol, @math)
-    - Speaker notes (Note:)
+    Uses GitPitch-style syntax:
+    - Slide delimiters: ---
+    - Grid layouts: [drag=X, drop=Y, fit=Z, bg=COLOR]
+    - Code widgets: @code[LANGUAGE]
+    - List widgets: @ul/@ol
+    - Math widgets: @math
+    - Speaker notes: Note:
     """
 
     has_content = True
-    required_arguments = 0
-    optional_arguments = 1
-    final_argument_whitespace = True
-
     option_spec = {
         "theme": directives.unchanged,
         "transition": directives.unchanged,
-        "background": directives.unchanged,
-        "height": directives.unchanged,
-        "width": directives.unchanged,
     }
 
     def run(self):
-        """Process the pitch directive content."""
         pitch_node = PitchNode()
         pitch_node["options"] = self.options
 
-        # Join content lines
+        # Split content by slide delimiter
         content = "\n".join(self.content)
-
-        # Parse GitPitch-style syntax
-        self._parse_slides(pitch_node, content)
-
-        return [pitch_node]
-
-    def _parse_slides(self, parent_node, content):
-        """Parse content and split into slides."""
-        # Split by slide delimiter (---)
         slides = re.split(r"\n---\s*\n", content)
 
         for i, slide_content in enumerate(slides):
@@ -323,255 +230,212 @@ class PitchDirective(SphinxDirective):
             if not slide_content:
                 continue
 
-            slide_node = SlideNode()
+            slide_node = PitchSlideNode()
             slide_node["slide_id"] = f"slide-{i + 1}"
 
-            # Parse slide content for grid blocks, widgets, etc.
+            # Parse slide content
             self._parse_slide_content(slide_node, slide_content)
 
-            parent_node += slide_node
+            pitch_node += slide_node
+
+        return [pitch_node]
 
     def _parse_slide_content(self, slide_node, content):
-        """Parse individual slide content."""
+        """Parse slide content and create child nodes."""
         lines = content.split("\n")
         i = 0
 
         while i < len(lines):
             line = lines[i]
+            stripped = line.strip()
 
-            # Check for grid block start [drag=X, drop=Y, ...]
-            if line.strip().startswith("[") and "drag=" in line:
-                block_content, i = self._extract_grid_block(lines, i)
-                grid_node = self._create_grid_block(block_content)
-                slide_node += grid_node
-            # Check for @code widget
-            elif line.strip().startswith("@code["):
-                code_lines, i = self._extract_code_widget(lines, i)
-                code_node = self._create_code_widget(code_lines)
+            # Grid layout block: [drag=..., drop=...]
+            if stripped.startswith("[") and "drag=" in stripped:
+                block_data, i = self._extract_float_block(lines, i)
+                float_node = self._create_float_node(block_data)
+                slide_node += float_node
+
+            # Code widget: @code[LANGUAGE]
+            elif stripped.startswith("@code["):
+                code_data, i = self._extract_code_widget(lines, i)
+                code_node = self._create_code_node(code_data)
                 slide_node += code_node
-            # Check for @ul/@ol widget
-            elif line.strip().startswith("@ul") or line.strip().startswith("@ol"):
-                list_content, list_type, i = self._extract_list_widget(lines, i)
-                list_node = self._create_list_widget(list_content, list_type)
+
+            # List widget: @ul or @ol
+            elif stripped.startswith("@ul") or stripped.startswith("@ol"):
+                list_data, i = self._extract_list_widget(lines, i)
+                list_node = self._create_list_node(list_data)
                 slide_node += list_node
-            # Check for @math widget
-            elif line.strip().startswith("@math"):
-                math_content, i = self._extract_math_widget(lines, i)
-                math_node = self._create_math_widget(math_content)
+
+            # Math widget: @math
+            elif stripped.startswith("@math"):
+                math_data, i = self._extract_math_widget(lines, i)
+                math_node = self._create_math_node(math_data)
                 slide_node += math_node
-            # Check for Note: (speaker notes)
-            elif line.strip().startswith("Note:"):
-                note_content, i = self._extract_note(lines, i)
-                note_node = self._create_note(note_content)
+
+            # Speaker notes: Note:
+            elif stripped.startswith("Note:"):
+                note_data, i = self._extract_note(lines, i)
+                note_node = self._create_note_node(note_data)
                 slide_node += note_node
+
+            # Regular content (headings, paragraphs)
             else:
-                # Regular content - parse as rst
-                if line.strip():
-                    self._parse_regular_content(slide_node, line)
+                if stripped:
+                    self._add_regular_content(slide_node, stripped)
                 i += 1
 
-    def _extract_grid_block(self, lines, start_idx):
-        """Extract grid block content."""
-        header_line = lines[start_idx]
-
-        # Parse grid attributes from header
-        attrs = self._parse_grid_attributes(header_line)
+    def _extract_float_block(self, lines, start_idx):
+        """Extract grid layout block content."""
+        header = lines[start_idx]
+        attrs = self._parse_attrs(header)
 
         content_lines = []
         i = start_idx + 1
 
-        # Collect content until next grid block or end
         while i < len(lines):
             line = lines[i]
             if line.strip().startswith("[") and "drag=" in line:
                 break
-            if line.strip().startswith("---"):
+            if line.strip() == "---":
                 break
             content_lines.append(line)
             i += 1
 
         return {"attrs": attrs, "content": "\n".join(content_lines)}, i
 
-    def _parse_grid_attributes(self, line):
-        """Parse grid attributes like [drag=50, drop=center, fit=2]."""
-        attrs = {}
+    def _create_float_node(self, data):
+        """Create a float/grid block node."""
+        node = PitchFloatNode()
+        node["attrs"] = data["attrs"]
 
-        # Remove brackets
-        content = line.strip()[1:-1] if line.strip().endswith("]") else line.strip()[1:]
+        # Parse the content as nested RST
+        content = data["content"]
+        if content:
+            # Parse content for headings, lists, etc.
+            lines = content.split("\n")
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                self._add_regular_content(node, line)
 
-        # Parse key=value pairs
-        pairs = re.findall(r"(\w+)=([^,\]]+)", content)
-        for key, value in pairs:
-            attrs[key] = value.strip()
-
-        return attrs
-
-    def _create_grid_block(self, block_data):
-        """Create a grid block node from parsed data."""
-        grid_node = GridBlockNode()
-        attrs = block_data["attrs"]
-
-        grid_node["drag"] = attrs.get("drag", "")
-        grid_node["drop"] = attrs.get("drop", "")
-        grid_node["fit"] = attrs.get("fit", "")
-        grid_node["flow"] = attrs.get("flow", "")
-        grid_node["bg"] = attrs.get("bg", "")
-
-        # Parse content inside grid block
-        content = block_data["content"]
-        self._parse_slide_content(grid_node, content)
-
-        return grid_node
+        return node
 
     def _extract_code_widget(self, lines, start_idx):
-        """Extract @code widget content (inline or file reference)."""
-        header_line = lines[start_idx]
-
-        # Parse attributes from header
-        match = re.match(r"@code\[([^\]]*)\]", header_line)
+        """Extract @code widget content."""
+        header = lines[start_idx]
+        match = re.match(r"@code\[([^\]]*)\]", header)
         attrs = {}
-        file_path = None
 
         if match:
             attr_str = match.group(1)
-            # Check if there's a file path: @code[attrs](path)
-            path_match = re.search(r"\]\(([^)]+)\)", header_line)
-            if path_match:
-                file_path = path_match.group(1)
-
-            # Parse attributes
-            for pair in attr_str.split(","):
-                pair = pair.strip()
-                if "=" in pair:
-                    key, value = pair.split("=", 1)
-                    attrs[key.strip()] = value.strip()
-                elif pair and not file_path:
-                    # First non-key-value is language
-                    attrs["language"] = pair
+            parts = [p.strip() for p in attr_str.split(",")]
+            if parts and parts[0] and "=" not in parts[0]:
+                attrs["language"] = parts[0]
+            for part in parts[1:] if len(parts) > 1 else parts:
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    attrs[k.strip()] = v.strip()
 
         content_lines = []
         i = start_idx + 1
 
-        if file_path:
-            # External file reference - no inline content
-            attrs["path"] = file_path
-        else:
-            # Inline code - collect until next special element or empty line
-            while i < len(lines):
-                line = lines[i]
-                if not line.strip():
-                    i += 1
-                    break
-                if (
-                    line.strip().startswith("@")
-                    or line.strip().startswith("[")
-                    or line.strip().startswith("---")
-                ):
-                    break
-                if line.strip().startswith("Note:"):
-                    break
-                content_lines.append(line)
+        # Collect until empty line or next special element
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+            if not stripped:
                 i += 1
+                break
+            if (
+                stripped.startswith("@")
+                or stripped.startswith("[")
+                or stripped == "---"
+            ):
+                break
+            if stripped.startswith("Note:"):
+                break
+            content_lines.append(line)
+            i += 1
 
         return {"attrs": attrs, "content": "\n".join(content_lines)}, i
 
-    def _create_code_widget(self, data):
-        """Create a code widget node from parsed data."""
-        node = CodeWidgetNode()
+    def _create_code_node(self, data):
+        """Create a code widget node."""
+        node = PitchCodeNode()
         node["attrs"] = data["attrs"]
         node["content"] = data["content"]
-        # Do NOT add literal_block node - visitor will output raw HTML
-        return node
-
-    def _parse_code_widget_old(self, line):
-        """Parse @code[language](path) syntax."""
-        node = CodeWidgetNode()
-
-        # Extract language and file path
-        match = re.match(r"@code\[([^\]]+)\]\(([^)]+)\)", line.strip())
-        if match:
-            params = match.group(1).split(",")
-            node["language"] = params[0].strip()
-            node["path"] = match.group(2)
-
-            # Parse additional attributes
-            for param in params[1:]:
-                param = param.strip()
-                if "drag=" in param:
-                    node["drag"] = param.replace("drag=", "")
-                elif "drop=" in param:
-                    node["drop"] = param.replace("drop=", "")
-                elif "fit=" in param:
-                    node["fit"] = param.replace("fit=", "")
-
         return node
 
     def _extract_list_widget(self, lines, start_idx):
         """Extract @ul or @ol widget content."""
-        header_line = lines[start_idx]
+        header = lines[start_idx]
+        list_type = "ol" if header.strip().startswith("@ol") else "ul"
 
-        # Determine list type
-        list_type = "ol" if header_line.strip().startswith("@ol") else "ul"
-
-        # Parse attributes from header
-        attrs_match = re.match(r"@(?:ul|ol)\[([^\]]*)\]", header_line)
+        # Parse classes from header
+        match = re.match(r"@(?:ul|ol)\[([^\]]*)\]", header)
         classes = []
-        if attrs_match:
-            classes = [c.strip() for c in attrs_match.group(1).split(",") if c.strip()]
+        if match:
+            classes = [
+                c.strip()
+                for c in match.group(1).split(",")
+                if c.strip() and "=" not in c.strip()
+            ]
 
         content_lines = []
         i = start_idx + 1
 
-        # Collect until closing tag
+        # Collect until closing tag @ul/@ol
         while i < len(lines):
             line = lines[i]
-            if line.strip() in ["@ul", "@ol"]:
+            stripped = line.strip()
+            if stripped in ["@ul", "@ol"]:
                 i += 1
                 break
-            if line.strip().startswith("@") and not line.strip().startswith("-"):
+            if stripped.startswith("@") and not stripped.startswith("-"):
+                break
+            if stripped == "---":
                 break
             content_lines.append(line)
             i += 1
 
-        return content_lines, list_type, i
+        return {"type": list_type, "classes": classes, "lines": content_lines}, i
 
-    def _create_list_widget(self, content_lines, list_type):
+    def _create_list_node(self, data):
         """Create a list widget node."""
-        node = ListWidgetNode()
-        node["list_type"] = list_type
-        node["classes"] = []
+        node = PitchListNode()
+        node["list_type"] = data["type"]
+        node["classes"] = data["classes"]
 
-        # Parse list items - store as simple text, visitor will create HTML
+        # Parse list items
         items = []
-        for line in content_lines:
-            line = line.strip()
-            if line.startswith("- ") or line.startswith("* "):
-                items.append(line[2:])
-            elif re.match(r"^\d+\.\s", line):
-                text = re.sub(r"^\d+\.\s", "", line)
-                items.append(text)
+        for line in data["lines"]:
+            stripped = line.strip()
+            if stripped.startswith("- ") or stripped.startswith("* "):
+                items.append(stripped[2:])
+            elif re.match(r"^\d+\.\s", stripped):
+                items.append(re.sub(r"^\d+\.\s", "", stripped))
 
         node["items"] = items
         return node
 
     def _extract_math_widget(self, lines, start_idx):
         """Extract @math widget content."""
-        header_line = lines[start_idx]
-
-        # Parse attributes
-        attrs_match = re.match(r"@math\[([^\]]*)\]", header_line)
+        header = lines[start_idx]
+        match = re.match(r"@math\[([^\]]*)\]", header)
         attrs = {}
-        if attrs_match:
-            attr_str = attrs_match.group(1)
-            for pair in attr_str.split(","):
-                if "=" in pair:
-                    key, value = pair.split("=", 1)
-                    attrs[key.strip()] = value.strip()
+
+        if match:
+            for part in match.group(1).split(","):
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    attrs[k.strip()] = v.strip()
 
         content_lines = []
         i = start_idx + 1
 
-        # Collect until closing @math tag
+        # Collect until closing @math
         while i < len(lines):
             line = lines[i]
             if line.strip() == "@math":
@@ -582,60 +446,81 @@ class PitchDirective(SphinxDirective):
 
         return {"attrs": attrs, "content": "\n".join(content_lines)}, i
 
-    def _create_math_widget(self, data):
+    def _create_math_node(self, data):
         """Create a math widget node."""
-        node = MathWidgetNode()
+        node = PitchMathNode()
         node["attrs"] = data["attrs"]
         node["content"] = data["content"]
         return node
 
     def _extract_note(self, lines, start_idx):
         """Extract speaker notes."""
-        # Skip "Note:" line
         i = start_idx + 1
         content_lines = []
 
-        # Collect all following lines until empty line or next special element
         while i < len(lines):
             line = lines[i]
-            if not line.strip():
+            stripped = line.strip()
+            if not stripped:
                 i += 1
                 break
-            if line.strip().startswith("[") or line.strip().startswith("@"):
+            if (
+                stripped.startswith("[")
+                or stripped.startswith("@")
+                or stripped == "---"
+            ):
                 break
             content_lines.append(line)
             i += 1
 
-        return "\n".join(content_lines), i
+        return {"content": "\n".join(content_lines)}, i
 
-    def _create_note(self, content):
+    def _create_note_node(self, data):
         """Create a speaker note node."""
-        node = NoteNode()
-        node["content"] = content
+        node = PitchNoteNode()
+        node["content"] = data["content"]
         return node
 
-    def _parse_regular_content(self, parent, line):
-        """Parse regular markdown/rst content."""
-        # Handle markdown headers - use strong paragraph instead of title
-        # (title nodes must be children of section nodes)
+    def _parse_attrs(self, line):
+        """Parse attributes like [drag=50, drop=center, fit=2]."""
+        attrs = {}
+        content = line.strip()
+        if content.startswith("[") and content.endswith("]"):
+            content = content[1:-1]
+
+        for match in re.finditer(r"(\w+)=([^,\]]+)", content):
+            attrs[match.group(1)] = match.group(2).strip()
+
+        return attrs
+
+    def _add_regular_content(self, parent, line):
+        """Add regular content (headings, paragraphs) as nodes."""
+        # Heading 1: # Title
         if line.startswith("# "):
-            title = line[2:]
             para = nodes.paragraph()
             para["classes"] = ["pitch-heading-1"]
             strong = nodes.strong()
-            strong += nodes.Text(title)
+            strong += nodes.Text(line[2:])
             para += strong
             parent += para
+
+        # Heading 2: ## Subtitle
         elif line.startswith("## "):
-            title = line[3:]
             para = nodes.paragraph()
             para["classes"] = ["pitch-heading-2"]
             strong = nodes.strong()
-            strong += nodes.Text(title)
+            strong += nodes.Text(line[3:])
             para += strong
             parent += para
+
+        # List item (inline)
+        elif line.startswith("- ") or line.startswith("* "):
+            para = nodes.paragraph()
+            para += nodes.Text("• " + line[2:])
+            parent += para
+
+        # Regular paragraph
         else:
-            # Regular paragraph
             para = nodes.paragraph()
             para += nodes.Text(line)
             parent += para
@@ -644,10 +529,10 @@ class PitchDirective(SphinxDirective):
 def setup(app: Sphinx):
     """Setup the sphinx-pitch extension."""
 
-    # Add the pitch directive
+    # Add directive
     app.add_directive("pitch", PitchDirective)
 
-    # Add custom nodes
+    # Add nodes with visitor functions
     app.add_node(
         PitchNode,
         html=(visit_pitch_node, depart_pitch_node),
@@ -656,51 +541,51 @@ def setup(app: Sphinx):
     )
 
     app.add_node(
-        SlideNode,
-        html=(visit_slide_node, depart_slide_node),
-        latex=(visit_slide_node, depart_slide_node),
-        text=(visit_slide_node, depart_slide_node),
+        PitchSlideNode,
+        html=(visit_pitch_slide_node, depart_pitch_slide_node),
+        latex=(visit_pitch_slide_node, depart_pitch_slide_node),
+        text=(visit_pitch_slide_node, depart_pitch_slide_node),
     )
 
     app.add_node(
-        GridBlockNode,
-        html=(visit_grid_block_node, depart_grid_block_node),
-        latex=(visit_grid_block_node, depart_grid_block_node),
-        text=(visit_grid_block_node, depart_grid_block_node),
+        PitchFloatNode,
+        html=(visit_pitch_float_node, depart_pitch_float_node),
+        latex=(visit_pitch_float_node, depart_pitch_float_node),
+        text=(visit_pitch_float_node, depart_pitch_float_node),
     )
 
     app.add_node(
-        CodeWidgetNode,
-        html=(visit_code_widget_node, depart_code_widget_node),
-        latex=(visit_code_widget_node, depart_code_widget_node),
-        text=(visit_code_widget_node, depart_code_widget_node),
+        PitchCodeNode,
+        html=(visit_pitch_code_node, depart_pitch_code_node),
+        latex=(visit_pitch_code_node, depart_pitch_code_node),
+        text=(visit_pitch_code_node, depart_pitch_code_node),
     )
 
     app.add_node(
-        ListWidgetNode,
-        html=(visit_list_widget_node, depart_list_widget_node),
-        latex=(visit_list_widget_node, depart_list_widget_node),
-        text=(visit_list_widget_node, depart_list_widget_node),
+        PitchListNode,
+        html=(visit_pitch_list_node, depart_pitch_list_node),
+        latex=(visit_pitch_list_node, depart_pitch_list_node),
+        text=(visit_pitch_list_node, depart_pitch_list_node),
     )
 
     app.add_node(
-        MathWidgetNode,
-        html=(visit_math_widget_node, depart_math_widget_node),
-        latex=(visit_math_widget_node, depart_math_widget_node),
-        text=(visit_math_widget_node, depart_math_widget_node),
+        PitchMathNode,
+        html=(visit_pitch_math_node, depart_pitch_math_node),
+        latex=(visit_pitch_math_node, depart_pitch_math_node),
+        text=(visit_pitch_math_node, depart_pitch_math_node),
     )
 
     app.add_node(
-        NoteNode,
-        html=(visit_note_node, depart_note_node),
-        latex=(visit_note_node, depart_note_node),
-        text=(visit_note_node, depart_note_node),
+        PitchNoteNode,
+        html=(visit_pitch_note_node, depart_pitch_note_node),
+        latex=(visit_pitch_note_node, depart_pitch_note_node),
+        text=(visit_pitch_note_node, depart_pitch_note_node),
     )
 
-    # Add CSS file
+    # Add CSS
     app.add_css_file("pitch.css")
 
-    # Add configuration values
+    # Config values
     app.add_config_value("pitch_theme", "default", "html")
     app.add_config_value("pitch_transition", "slide", "html")
 

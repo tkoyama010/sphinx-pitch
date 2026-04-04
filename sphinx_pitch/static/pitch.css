@@ -6,111 +6,45 @@
 /* Presentation container */
 .pitch-presentation {
     position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-/* Slide deck wrapper */
-.pitch-slides-container {
-    position: relative;
-    width: 100%;
-    height: 600px;
-    overflow: hidden;
-    background: #1a1a2e;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
 }
 
 /* Individual slide */
 .pitch-slide {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
+    min-height: 500px;
     padding: 40px;
+    margin: 0 0 20px 0;
     background: #1a1a2e;
     color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-.pitch-slide.active {
-    display: block;
-    opacity: 1;
 }
 
 /* Slide headings */
-.pitch-slide .pitch-heading-1 {
+.pitch-heading-1 {
     font-size: 2.5em;
-    margin: 0 0 0.5em 0;
+    font-weight: bold;
+    margin: 0 0 20px 0;
     color: #ffffff;
-    font-weight: bold;
 }
 
-.pitch-slide .pitch-heading-1 strong {
-    font-weight: bold;
-}
-
-.pitch-slide .pitch-heading-2 {
+.pitch-heading-2 {
     font-size: 1.8em;
-    margin: 0 0 0.5em 0;
+    font-weight: bold;
+    margin: 0 0 15px 0;
     color: #e0e0e0;
-    font-weight: bold;
 }
 
-.pitch-slide .pitch-heading-2 strong {
-    font-weight: bold;
-}
-
-/* Slide navigation */
-.pitch-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: #f5f5f5;
-    border-radius: 0 0 8px 8px;
-}
-
-.pitch-nav button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.pitch-nav button:hover {
-    background: #0056b3;
-}
-
-.pitch-nav button:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-}
-
-.pitch-slide-counter {
-    font-size: 14px;
-    color: #666;
-}
-
-/* Grid block styles */
+/* Grid/Floating blocks */
 .pitch-grid-block {
-    position: absolute;
     box-sizing: border-box;
     padding: 20px;
 }
 
-/* Drop position classes */
+/* Position classes */
 .drop-center {
     left: 50%;
     top: 50%;
@@ -144,40 +78,32 @@
 .drop-topleft {
     left: 5%;
     top: 5%;
-    transform: none;
 }
 
 .drop-topright {
     right: 5%;
     top: 5%;
-    transform: none;
 }
 
 .drop-bottomleft {
     left: 5%;
     bottom: 5%;
-    transform: none;
 }
 
 .drop-bottomright {
     right: 5%;
     bottom: 5%;
-    transform: none;
 }
 
 /* Flow styles */
 .flow-col {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
 }
 
 .flow-row {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
 }
 
 .flow-stack {
@@ -187,15 +113,15 @@
     align-items: center;
 }
 
-/* Code widget styles */
+/* Code widget */
 .pitch-code-widget {
     background: #2d2d2d;
     border-radius: 4px;
     padding: 15px;
-    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    margin: 10px 0;
+    font-family: 'Fira Code', Consolas, Monaco, monospace;
     font-size: 14px;
     overflow-x: auto;
-    margin: 10px 0;
 }
 
 .pitch-code-widget pre {
@@ -208,49 +134,27 @@
     color: #f8f8f2;
     background: none;
     padding: 0;
-    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
 }
 
-/* Inline code styling */
-.pitch-slide code {
-    background: #2d2d2d;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
-    font-size: 0.9em;
-}
-
-/* List widget styles */
+/* List widget */
 .pitch-list-widget {
     list-style-position: inside;
     padding-left: 0;
-    margin: 0;
+    margin: 10px 0;
 }
 
 .pitch-list-widget li {
-    margin: 10px 0;
-    line-height: 1.6;
+    margin: 8px 0;
+    line-height: 1.5;
     color: #ffffff;
 }
 
-/* Bullet styles */
-.list-spaced-bullets li {
-    margin: 15px 0;
-}
-
-.list-fade-bullets li {
-    opacity: 0.8;
-}
-
-.list-square-bullets {
-    list-style-type: square;
-}
-
-/* Math widget styles */
+/* Math widget */
 .pitch-math-widget {
     text-align: center;
     font-size: 1.2em;
     padding: 20px;
+    color: #ffffff;
 }
 
 /* Speaker notes */
@@ -258,48 +162,18 @@
     display: none;
 }
 
-/* Slide controls */
-.pitch-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 100;
-}
-
-.pitch-controls button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.pitch-controls button:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-/* Responsive design */
+/* Responsive */
 @media (max-width: 768px) {
-    .pitch-slides-container {
-        height: 400px;
-    }
-    
     .pitch-slide {
+        min-height: 400px;
         padding: 20px;
     }
     
-    .pitch-slide .pitch-heading-1 {
+    .pitch-heading-1 {
         font-size: 1.8em;
     }
     
-    .pitch-slide .pitch-heading-2 {
+    .pitch-heading-2 {
         font-size: 1.4em;
     }
     
@@ -307,9 +181,9 @@
         position: relative !important;
         width: 100% !important;
         height: auto !important;
-        left: 0 !important;
-        top: 0 !important;
+        left: auto !important;
         right: auto !important;
+        top: auto !important;
         bottom: auto !important;
         transform: none !important;
     }
