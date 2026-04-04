@@ -196,7 +196,7 @@ class PitchDirective(SphinxDirective):
     def _process_grid_content(self, grid: PitchGridNode) -> None:
         """Process collected grid content and add to node."""
         for raw_content_line in grid.get("content", []):
-            content_line: str = cast(str, raw_content_line)
+            content_line: str = cast("str", raw_content_line)
             content_stripped: str = content_line.strip()
             if not content_stripped:
                 continue
