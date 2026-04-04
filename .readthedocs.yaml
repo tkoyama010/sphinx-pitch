@@ -8,14 +8,19 @@ build:
   tools:
     python: "3.13"
   jobs:
+    post_install:
+      # Install dependencies
+      - pip install -r docs/requirements.txt
+      - pip install -e .
     build:
       html:
         # Use revealjs builder instead of standard html builder
         - mkdir -p $READTHEDOCS_OUTPUT/html/
         - sphinx-build -b revealjs docs $READTHEDOCS_OUTPUT/html/
 
-python:
-   install:
-   - method: pip
-     path: .
-   - requirements: docs/requirements.txt
+# Remove python install section since we do it in post_install
+# python:
+#    install:
+#    - method: pip
+#      path: .
+#    - requirements: docs/requirements.txt
