@@ -199,12 +199,14 @@ def depart_pitch_node(self, node):
         grid_script = f"""
 <script>
 (function(){{
-var deck=document.currentScript.closest('.pitch-deck');
+function initGrid(){{
+var deck=document.querySelector('.pitch-deck');
 var gridOverlay=deck.querySelector('.pitch-grid-overlay');
 if(gridOverlay){{
 var gridSize={grid_size};
-var width=deck.offsetWidth;
-var height=deck.offsetHeight;
+var rect=deck.getBoundingClientRect();
+var width=Math.floor(rect.width);
+var height=Math.floor(rect.height);
 var svgNS="http://www.w3.org/2000/svg";
 var svg=document.createElementNS(svgNS,"svg");
 svg.setAttribute("width",width);
@@ -213,66 +215,70 @@ svg.style.position="absolute";
 svg.style.top="0";
 svg.style.left="0";
 svg.style.pointerEvents="none";
-// Grid lines
-for(var x=0;x<=width;x+=gridSize){{
-var line=document.createElementNS(svgNS,"line");
-line.setAttribute("x1",x);
-line.setAttribute("y1",0);
-line.setAttribute("x2",x);
-line.setAttribute("y2",height);
-line.setAttribute("stroke","rgba(255,255,255,0.3)");
-line.setAttribute("stroke-width","1");
-svg.appendChild(line);
-// X-axis numbers
-if(x>0){{
-var text=document.createElementNS(svgNS,"text");
-text.setAttribute("x",x);
-text.setAttribute("y",15);
-text.setAttribute("text-anchor","middle");
-text.setAttribute("fill","white");
-text.setAttribute("font-size","10");
-text.textContent=x;
-svg.appendChild(text);
-}}
-}}
-for(var y=0;y<=height;y+=gridSize){{
-var line=document.createElementNS(svgNS,"line");
-line.setAttribute("x1",0);
-line.setAttribute("y1",y);
-line.setAttribute("x2",width);
-line.setAttribute("y2",y);
-line.setAttribute("stroke","rgba(255,255,255,0.3)");
-line.setAttribute("stroke-width","1");
-svg.appendChild(line);
-// Y-axis numbers
-if(y>0){{
-var text=document.createElementNS(svgNS,"text");
-text.setAttribute("x",25);
-text.setAttribute("y",y+3);
-text.setAttribute("text-anchor","middle");
-text.setAttribute("fill","white");
-text.setAttribute("font-size","10");
-text.textContent=y;
-svg.appendChild(text);
-}}
-}}
-// Background for rulers
+// Background for rulers (draw first so it's behind grid lines)
 var rulerBg=document.createElementNS(svgNS,"rect");
 rulerBg.setAttribute("x",0);
 rulerBg.setAttribute("y",0);
 rulerBg.setAttribute("width",width);
 rulerBg.setAttribute("height",20);
-rulerBg.setAttribute("fill","rgba(0,0,0,0.7)");
+rulerBg.setAttribute("fill","rgba(0,0,0,0.8)");
 svg.appendChild(rulerBg);
 var rulerBg2=document.createElementNS(svgNS,"rect");
 rulerBg2.setAttribute("x",0);
 rulerBg2.setAttribute("y",0);
 rulerBg2.setAttribute("width",50);
 rulerBg2.setAttribute("height",height);
-rulerBg2.setAttribute("fill","rgba(0,0,0,0.7)");
+rulerBg2.setAttribute("fill","rgba(0,0,0,0.8)");
 svg.appendChild(rulerBg2);
+// Grid lines
+for(var x=0;x<=width;x+=gridSize){{
+var line=document.createElementNS(svgNS,"line");
+line.setAttribute("x1",x);
+line.setAttribute("y1",20);
+line.setAttribute("x2",x);
+line.setAttribute("y2",height);
+line.setAttribute("stroke","rgba(255,255,255,0.5)");
+line.setAttribute("stroke-width","1");
+svg.appendChild(line);
+// X-axis numbers
+if(x>0 && x%100===0){{
+var text=document.createElementNS(svgNS,"text");
+text.setAttribute("x",x);
+text.setAttribute("y",15);
+text.setAttribute("text-anchor","middle");
+text.setAttribute("fill","#fff");
+text.setAttribute("font-size","12");
+text.setAttribute("font-weight","bold");
+text.textContent=x;
+svg.appendChild(text);
+}}
+}}
+for(var y=20;y<=height;y+=gridSize){{
+var line=document.createElementNS(svgNS,"line");
+line.setAttribute("x1",50);
+line.setAttribute("y1",y);
+line.setAttribute("x2",width);
+line.setAttribute("y2",y);
+line.setAttribute("stroke","rgba(255,255,255,0.5)");
+line.setAttribute("stroke-width","1");
+svg.appendChild(line);
+// Y-axis numbers
+if(y>0 && y%100===0){{
+var text=document.createElementNS(svgNS,"text");
+text.setAttribute("x",25);
+text.setAttribute("y",y+4);
+text.setAttribute("text-anchor","middle");
+text.setAttribute("fill","#fff");
+text.setAttribute("font-size","12");
+text.setAttribute("font-weight","bold");
+text.textContent=y;
+svg.appendChild(text);
+}}
+}}
 gridOverlay.appendChild(svg);
 }}
+}}
+if(document.readyState==='complete'){{initGrid();}}else{{window.addEventListener('load',initGrid);}}
 }})();
 </script>"""
     self.body.append(f"""
