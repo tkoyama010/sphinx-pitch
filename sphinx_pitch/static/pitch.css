@@ -2,13 +2,14 @@
 .pitch-deck {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 100vh; /* Full viewport height */
+    min-height: 400px;
     background: #1a1a2e;
     border-radius: 8px;
     overflow: hidden;
 }
 
-/* Grid overlay on top of content */
+/* Grid overlay covering entire deck */
 .pitch-deck[data-grid]::before {
     content: '';
     position: absolute;
