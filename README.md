@@ -17,9 +17,10 @@ sphinx-pitch allows you to create beautiful slide presentations using Sphinx and
 - [Configuration](#configuration)
 - [Examples](#examples)
 - [GitPitch Compatibility](#gitpitch-compatibility)
+- [Acknowledgments](#acknowledgments)
+- [Support](#support)
 - [Contributing](#contributing)
 - [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ## Install
 
@@ -217,6 +218,17 @@ This extension supports the following GitPitch features:
 - Background colors (`bg=`)
 - Pixel and percentage units
 
+## Acknowledgments
+
+- Inspired by [GitPitch](https://github.com/gitpitch/gitpitch) - The original markdown presentation service
+- Built for [Sphinx](https://www.sphinx-doc.org/) - Python documentation generator
+- Thanks to all contributors!
+
+## Support
+
+- Issues: [GitHub Issues](https://github.com/tetsuo-koyama/sphinx-pitch/issues)
+- Discussions: [GitHub Discussions](https://github.com/tetsuo-koyama/sphinx-pitch/discussions)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -230,17 +242,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by [GitPitch](https://github.com/gitpitch/gitpitch) - The original markdown presentation service
-- Built for [Sphinx](https://www.sphinx-doc.org/) - Python documentation generator
-- Thanks to all contributors!
-
-## Support
-
-- Issues: [GitHub Issues](https://github.com/tetsuo-koyama/sphinx-pitch/issues)
-- Discussions: [GitHub Discussions](https://github.com/tetsuo-koyama/sphinx-pitch/discussions)
 
 ---
 
