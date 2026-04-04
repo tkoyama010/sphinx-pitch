@@ -253,6 +253,11 @@ def visit_list_widget_node(self, node):
     else:
         self.body.append(f'<ul class="pitch-list-widget {class_attr}">')
 
+    # Output list items directly
+    items = node.get("items", [])
+    for item in items:
+        self.body.append(f"<li>{item}</li>")
+
 
 def depart_list_widget_node(self, node):
     list_type = node.get("list_type", "ul")
@@ -475,13 +480,7 @@ class PitchDirective(SphinxDirective):
         node = CodeWidgetNode()
         node["attrs"] = data["attrs"]
         node["content"] = data["content"]
-
-        # Add code content as text node
-        if data["content"]:
-            text_node = nodes.literal_block(text=data["content"])
-            text_node["language"] = data["attrs"].get("language", "text")
-            node += text_node
-
+        # Do NOT add literal_block node - visitor will output raw HTML
         return node
 
     def _parse_code_widget_old(self, line):
@@ -542,25 +541,17 @@ class PitchDirective(SphinxDirective):
         node["list_type"] = list_type
         node["classes"] = []
 
-        # Parse list items
+        # Parse list items - store as simple text, visitor will create HTML
+        items = []
         for line in content_lines:
             line = line.strip()
             if line.startswith("- ") or line.startswith("* "):
-                # Create list item node with paragraph
-                item_node = nodes.list_item()
-                para = nodes.paragraph()
-                para += nodes.Text(line[2:])
-                item_node += para
-                node += item_node
+                items.append(line[2:])
             elif re.match(r"^\d+\.\s", line):
-                # Ordered list item
-                item_node = nodes.list_item()
-                para = nodes.paragraph()
                 text = re.sub(r"^\d+\.\s", "", line)
-                para += nodes.Text(text)
-                item_node += para
-                node += item_node
+                items.append(text)
 
+        node["items"] = items
         return node
 
     def _extract_math_widget(self, lines, start_idx):
