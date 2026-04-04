@@ -1,14 +1,25 @@
 # sphinx-pitch
 
-A Sphinx extension for creating presentations with **GitPitch-compatible syntax**.
-
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Sphinx 3.0+](https://img.shields.io/badge/sphinx-3.0+-green.svg)](https://www.sphinx-doc.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+A Sphinx extension for creating presentations with **GitPitch-compatible syntax**.
 
 sphinx-pitch allows you to create beautiful slide presentations using Sphinx and reStructuredText with **GitPitch-compatible markdown syntax**. It brings the power of GitPitch's presentation features to the Sphinx ecosystem.
+
+## Table of Contents
+
+- [Install](#install)
+- [Usage](#usage)
+- [Features](#features)
+- [Syntax Reference](#syntax-reference)
+- [Configuration](#configuration)
+- [Examples](#examples)
+- [GitPitch Compatibility](#gitpitch-compatibility)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ## Install
 
@@ -196,15 +207,15 @@ See the [documentation](https://sphinx-pitch.readthedocs.io/) for complete worki
 
 This extension supports the following GitPitch features:
 
-- ✅ Slide delimiters (`---`)
-- ✅ Grid layouts (`[drag=, drop=, fit=, flow=]`)
-- ✅ Named positions (center, left, right, top, bottom, etc.)
-- ✅ Code widgets (`@code[language]`)
-- ✅ List widgets (`@ul`, `@ol`)
-- ✅ Math widgets (`@math`)
-- ✅ Speaker notes (`Note:`)
-- ✅ Background colors (`bg=`)
-- ✅ Pixel and percentage units
+- Slide delimiters (`---`)
+- Grid layouts (`[drag=, drop=, fit=, flow=]`)
+- Named positions (center, left, right, top, bottom, etc.)
+- Code widgets (`@code[language]`)
+- List widgets (`@ul`, `@ol`)
+- Math widgets (`@math`)
+- Speaker notes (`Note:`)
+- Background colors (`bg=`)
+- Pixel and percentage units
 
 ## Contributing
 
@@ -228,9 +239,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-- 📧 Issues: [GitHub Issues](https://github.com/tetsuo-koyama/sphinx-pitch/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/tetsuo-koyama/sphinx-pitch/discussions)
+- Issues: [GitHub Issues](https://github.com/tetsuo-koyama/sphinx-pitch/issues)
+- Discussions: [GitHub Discussions](https://github.com/tetsuo-koyama/sphinx-pitch/discussions)
 
 ---
 
-Made with ❤️ for the Sphinx and GitPitch communities.
+Made with for the Sphinx and GitPitch communities.
