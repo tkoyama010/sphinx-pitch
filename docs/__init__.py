@@ -1,1 +1,1 @@
-# docs package
+"""Sphinx documentation for sphinx-pitch."""
