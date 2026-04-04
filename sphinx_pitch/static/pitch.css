@@ -19,7 +19,7 @@
     box-sizing: border-box;
 }
 
-/* Grid overlay using ::before pseudo-element */
+/* Grid overlay using ::before pseudo-element - visible on top of content */
 .pitch-slide[data-grid-size]::before {
     content: '';
     position: absolute;
@@ -29,7 +29,7 @@
     height: 100%;
     pointer-events: none;
     z-index: 1000;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.6) 2px, transparent 2px);
+    background-image: radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px);
     background-size: var(--grid-size, 20px) var(--grid-size, 20px);
 }
 
