@@ -1,260 +1,26 @@
-/*
- * sphinx-pitch CSS
- * Reveal.js-compatible presentation styles
- */
-
-/* Presentation container - Reveal.js style */
-.pitch-presentation {
+/* Minimal pitch presentation styles */
+.pitch-deck {
     position: relative;
     width: 100%;
-    height: 600px;
-    margin: 20px 0;
-    overflow: hidden;
+    height: 400px;
     background: #1a1a2e;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* Slides viewport */
-.pitch-slides {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 60px);
     overflow: hidden;
 }
 
-/* Individual slide - Reveal.js style */
 .pitch-slide {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    padding: 40px 60px;
-    background: #1a1a2e;
-    color: #ffffff;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    overflow: hidden;
+    padding: 40px;
+    color: white;
     box-sizing: border-box;
 }
 
-.pitch-slide.active {
-    display: block;
-    opacity: 1;
-}
-
-/* Slide headings */
-.pitch-slide .pitch-heading-1 {
-    font-size: 2.5em;
+.pitch-title {
+    font-size: 2em;
     font-weight: bold;
-    margin: 0 0 30px 0;
-    color: #ffffff;
-    text-align: center;
-}
-
-.pitch-slide .pitch-heading-2 {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 0 0 20px 0;
-    color: #e0e0e0;
-}
-
-/* Grid/Floating blocks */
-.pitch-grid-block {
-    position: absolute;
-    box-sizing: border-box;
-    padding: 20px;
-}
-
-/* Position classes */
-.drop-center {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.drop-left {
-    left: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.drop-right {
-    right: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.drop-top {
-    left: 50%;
-    top: 5%;
-    transform: translateX(-50%);
-}
-
-.drop-bottom {
-    left: 50%;
-    bottom: 5%;
-    transform: translateX(-50%);
-}
-
-.drop-topleft {
-    left: 5%;
-    top: 5%;
-}
-
-.drop-topright {
-    right: 5%;
-    top: 5%;
-}
-
-.drop-bottomleft {
-    left: 5%;
-    bottom: 5%;
-}
-
-.drop-bottomright {
-    right: 5%;
-    bottom: 5%;
-}
-
-/* Flow styles */
-.flow-col {
-    display: flex;
-    flex-direction: column;
-}
-
-.flow-row {
-    display: flex;
-    flex-direction: row;
-}
-
-.flow-stack {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Code widget */
-.pitch-code-widget {
-    background: #2d2d2d;
-    border-radius: 4px;
-    padding: 15px;
-    margin: 10px 0;
-    font-family: 'Fira Code', Consolas, Monaco, monospace;
-    font-size: 14px;
-    overflow-x: auto;
-}
-
-.pitch-code-widget pre {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-}
-
-.pitch-code-widget code {
-    color: #f8f8f2;
-    background: none;
-    padding: 0;
-}
-
-/* List widget */
-.pitch-list-widget {
-    list-style-position: inside;
-    padding-left: 0;
-    margin: 10px 0;
-}
-
-.pitch-list-widget li {
-    margin: 12px 0;
-    line-height: 1.6;
-    color: #ffffff;
-    font-size: 1.1em;
-}
-
-/* Math widget */
-.pitch-math-widget {
-    text-align: center;
-    font-size: 1.4em;
-    padding: 20px;
-    color: #ffffff;
-}
-
-/* Speaker notes - hidden by default */
-.pitch-notes {
-    display: none;
-}
-
-/* Navigation controls - Reveal.js style */
-.pitch-controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    z-index: 100;
-}
-
-.pitch-controls button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-
-.pitch-controls button:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-.pitch-controls button:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.pitch-slide-number {
-    color: white;
-    font-size: 14px;
-    min-width: 60px;
-    text-align: center;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .pitch-presentation {
-        height: 400px;
-    }
-    
-    .pitch-slide {
-        padding: 20px 30px;
-    }
-    
-    .pitch-slide .pitch-heading-1 {
-        font-size: 1.8em;
-    }
-    
-    .pitch-slide .pitch-heading-2 {
-        font-size: 1.4em;
-    }
-    
-    .pitch-grid-block {
-        position: relative !important;
-        width: 100% !important;
-        height: auto !important;
-        left: auto !important;
-        right: auto !important;
-        top: auto !important;
-        bottom: auto !important;
-        transform: none !important;
-    }
+    margin-bottom: 20px;
 }
