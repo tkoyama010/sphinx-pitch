@@ -23,7 +23,7 @@ class PitchGridNode(nodes.General, nodes.Element):
 
 # Regex to parse [drag=WIDTH HEIGHT, drop=POSITION, ...] syntax
 DRAG_PATTERN = re.compile(
-    r"\[drag=(\d+)\s+(\d+)(?:,\s*drop=(\w+))?(?:,\s*flow=(\w+))?(?:,\s*sync=(\w+))?\]"
+    r"\[drag=(\d+)\s+(\d+)(?:,\s*drop=(\w+))?(?:,\s*flow=(\w+))?(?:,\s*sync=(\w+))?(?:,\s*bg=([#\w]+))?\]"
 )
 
 
@@ -70,6 +70,7 @@ class PitchDirective(SphinxDirective):
                     position = drag_match.group(3) or "left"
                     flow = drag_match.group(4) or ""
                     sync = drag_match.group(5) or ""
+                    bg = drag_match.group(6) or ""
 
                     # Collect grid content until next drag directive or end of slide
                     grid_content = []
@@ -92,6 +93,7 @@ class PitchDirective(SphinxDirective):
                     grid["position"] = position
                     grid["flow"] = flow
                     grid["sync"] = sync
+                    grid["bg"] = bg
 
                     # Process grid content
                     for content_line in grid_content:
@@ -181,6 +183,7 @@ def visit_pitch_grid_node(self, node):
     position = node.get("position", "left")
     flow = node.get("flow", "")
     sync = node.get("sync", "")
+    bg = node.get("bg", "")
 
     # Calculate CSS properties based on position
     if position == "left":
@@ -216,6 +219,9 @@ def visit_pitch_grid_node(self, node):
     if flow == "stack":
         styles.append("display: flex")
         styles.append("flex-direction: column")
+
+    if bg:
+        styles.append(f"background-color: {bg}")
 
     style_str = "; ".join(styles)
     self.body.append(f'<div class="pitch-grid" style="{style_str}">')
