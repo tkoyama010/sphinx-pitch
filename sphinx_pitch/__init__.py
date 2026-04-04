@@ -186,35 +186,112 @@ def visit_pitch_node(self, node):
     grid_size = node.get("grid", "")
     grid_html = ""
     if grid_size:
-        # Add grid overlay at deck level (not affected by slide visibility)
-        grid_html = f"""<div class="pitch-grid-overlay" style="--grid-size: {grid_size}px;">
-            <div class="pitch-grid-lines"></div>
-            <div class="pitch-grid-ruler-x"></div>
-            <div class="pitch-grid-ruler-y"></div>
-        </div>"""
+        # Add simple container for grid (JavaScript will populate it)
+        grid_html = '<div class="pitch-grid-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>'
     self.body.append(f'<div class="pitch-deck">{grid_html}')
 
 
 def depart_pitch_node(self, node):
-    self.body.append(
-        """
+    grid_size = node.get("grid", "")
+    grid_script = ""
+    if grid_size:
+        # Add JavaScript to dynamically generate grid with numbers
+        grid_script = f"""
 <script>
-(function(){
+(function(){{
+var deck=document.currentScript.closest('.pitch-deck');
+var gridOverlay=deck.querySelector('.pitch-grid-overlay');
+if(gridOverlay){{
+var gridSize={grid_size};
+var width=deck.offsetWidth;
+var height=deck.offsetHeight;
+var svgNS="http://www.w3.org/2000/svg";
+var svg=document.createElementNS(svgNS,"svg");
+svg.setAttribute("width",width);
+svg.setAttribute("height",height);
+svg.style.position="absolute";
+svg.style.top="0";
+svg.style.left="0";
+svg.style.pointerEvents="none";
+// Grid lines
+for(var x=0;x<=width;x+=gridSize){{
+var line=document.createElementNS(svgNS,"line");
+line.setAttribute("x1",x);
+line.setAttribute("y1",0);
+line.setAttribute("x2",x);
+line.setAttribute("y2",height);
+line.setAttribute("stroke","rgba(255,255,255,0.3)");
+line.setAttribute("stroke-width","1");
+svg.appendChild(line);
+// X-axis numbers
+if(x>0){{
+var text=document.createElementNS(svgNS,"text");
+text.setAttribute("x",x);
+text.setAttribute("y",15);
+text.setAttribute("text-anchor","middle");
+text.setAttribute("fill","white");
+text.setAttribute("font-size","10");
+text.textContent=x;
+svg.appendChild(text);
+}}
+}}
+for(var y=0;y<=height;y+=gridSize){{
+var line=document.createElementNS(svgNS,"line");
+line.setAttribute("x1",0);
+line.setAttribute("y1",y);
+line.setAttribute("x2",width);
+line.setAttribute("y2",y);
+line.setAttribute("stroke","rgba(255,255,255,0.3)");
+line.setAttribute("stroke-width","1");
+svg.appendChild(line);
+// Y-axis numbers
+if(y>0){{
+var text=document.createElementNS(svgNS,"text");
+text.setAttribute("x",25);
+text.setAttribute("y",y+3);
+text.setAttribute("text-anchor","middle");
+text.setAttribute("fill","white");
+text.setAttribute("font-size","10");
+text.textContent=y;
+svg.appendChild(text);
+}}
+}}
+// Background for rulers
+var rulerBg=document.createElementNS(svgNS,"rect");
+rulerBg.setAttribute("x",0);
+rulerBg.setAttribute("y",0);
+rulerBg.setAttribute("width",width);
+rulerBg.setAttribute("height",20);
+rulerBg.setAttribute("fill","rgba(0,0,0,0.7)");
+svg.appendChild(rulerBg);
+var rulerBg2=document.createElementNS(svgNS,"rect");
+rulerBg2.setAttribute("x",0);
+rulerBg2.setAttribute("y",0);
+rulerBg2.setAttribute("width",50);
+rulerBg2.setAttribute("height",height);
+rulerBg2.setAttribute("fill","rgba(0,0,0,0.7)");
+svg.appendChild(rulerBg2);
+gridOverlay.appendChild(svg);
+}}
+}})();
+</script>"""
+    self.body.append(f"""
+<script>
+(function(){{
 var deck=document.currentScript.closest('.pitch-deck');
 var slides=deck.querySelectorAll('.pitch-slide');
 var current=0;
-function show(){slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}
-function next(){if(current<slides.length-1){current++;show();}}
-function prev(){if(current>0){current--;show();}}
-document.addEventListener('keydown',function(e){
+function show(){{slides.forEach((s,i)=>s.style.display=i===current?'block':'none');}}
+function next(){{if(current<slides.length-1){{current++;show();}}}}
+function prev(){{if(current>0){{current--;show();}}}}
+document.addEventListener('keydown',function(e){{
 if(e.key==='ArrowRight'||e.key===' ')next();
 if(e.key==='ArrowLeft')prev();
-});
+}});
 show();
-})();
-</script>
-</div>"""
-    )
+}})();
+</script>{grid_script}
+</div>""")
 
 
 def visit_pitch_slide_node(self, node):
