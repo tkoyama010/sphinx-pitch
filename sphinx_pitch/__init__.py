@@ -184,16 +184,11 @@ class PitchDirective(SphinxDirective):
 
 def visit_pitch_node(self, node):
     grid_size = node.get("grid", "")
-    grid_style = ""
+    # Add data-grid attribute when grid size is configured
     if grid_size:
-        # Create CSS grid with background image pattern
-        grid_style = f""" style="background-image: 
-            linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px),
-            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px); 
-            background-size: {grid_size}px {grid_size}px, {grid_size}px {grid_size}px, 100px 100px, 100px 100px;"""
-    self.body.append(f'<div class="pitch-deck"{grid_style}>')
+        self.body.append(f'<div class="pitch-deck" data-grid="{grid_size}">')
+    else:
+        self.body.append('<div class="pitch-deck">')
 
 
 def depart_pitch_node(self, node):
