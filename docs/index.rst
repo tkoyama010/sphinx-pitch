@@ -1,7 +1,6 @@
-Welcome to sphinx-pitch!
-=========================
-
 .. pitch::
+
+   # Welcome to sphinx-pitch!
 
    [drag=48% 40%, drop=left, bg=#e74c3c]
    
