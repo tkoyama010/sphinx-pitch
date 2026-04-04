@@ -1,14 +1,19 @@
+"""Setup configuration for sphinx-pitch."""
+
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
-with open("README.md", encoding="utf-8") as fh:
-    long_description = fh.read()
+long_description = Path("README.md").open(encoding="utf-8").read()
 
 setup(
     name="sphinx-pitch",
     version="0.1.0",
     author="sphinx-pitch authors",
     author_email="",
-    description="A Sphinx extension for creating presentations with GitPitch-compatible syntax",
+    description=(
+        "A Sphinx extension for creating presentations with GitPitch-compatible syntax"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/tetsuo-koyama/sphinx-pitch",
