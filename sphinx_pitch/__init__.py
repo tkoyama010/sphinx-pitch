@@ -13,6 +13,7 @@ Main features:
 - Speaker notes
 """
 
+import html
 import re
 from docutils import nodes
 from docutils.parsers.rst import directives, Directive
@@ -64,12 +65,76 @@ class NoteNode(nodes.General, nodes.Element):
 
 
 def visit_pitch_node(self, node):
-    """Generate HTML output for pitch node."""
+    """Generate HTML output for pitch node with slideshow container."""
     self.body.append('<div class="pitch-presentation">')
+    self.body.append('<div class="pitch-slides-container">')
 
 
 def depart_pitch_node(self, node):
-    self.body.append("</div>")
+    """Close pitch node and add navigation controls."""
+    self.body.append("</div>")  # Close slides container
+
+    # Add navigation controls
+    self.body.append("""
+<div class="pitch-nav">
+    <button class="pitch-prev" onclick="pitchPrevSlide(this)">← Previous</button>
+    <span class="pitch-slide-counter"><span class="pitch-current">1</span> / <span class="pitch-total">1</span></span>
+    <button class="pitch-next" onclick="pitchNextSlide(this)">Next →</button>
+</div>
+<script>
+(function() {
+    function initPitchPresentation(container) {
+        const slides = container.querySelectorAll('.pitch-slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        if (totalSlides === 0) return;
+        
+        // Show first slide
+        slides[0].classList.add('active');
+        
+        // Update counter
+        const counter = container.parentElement.querySelector('.pitch-slide-counter');
+        if (counter) {
+            counter.querySelector('.pitch-total').textContent = totalSlides;
+            updateCounter();
+        }
+        
+        function updateCounter() {
+            if (counter) {
+                counter.querySelector('.pitch-current').textContent = currentSlide + 1;
+            }
+            const prevBtn = container.parentElement.querySelector('.pitch-prev');
+            const nextBtn = container.parentElement.querySelector('.pitch-next');
+            if (prevBtn) prevBtn.disabled = currentSlide === 0;
+            if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+        
+        window.pitchNextSlide = function(btn) {
+            if (currentSlide < totalSlides - 1) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+                slides[currentSlide].classList.add('active');
+                updateCounter();
+            }
+        };
+        
+        window.pitchPrevSlide = function(btn) {
+            if (currentSlide > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide--;
+                slides[currentSlide].classList.add('active');
+                updateCounter();
+            }
+        };
+    }
+    
+    // Initialize all presentations
+    document.querySelectorAll('.pitch-slides-container').forEach(initPitchPresentation);
+})();
+</script>
+''')
+    self.body.append("</div>")  # Close presentation
 
 
 def visit_slide_node(self, node):
@@ -157,10 +222,19 @@ def depart_note_node(self, node):
 
 def visit_code_widget_node(self, node):
     """Generate HTML output for code widget."""
-    language = node.get("language", "text")
+    attrs = node.get("attrs", {})
+    language = attrs.get("language", "text")
+    content = node.get("content", "")
+    
+    # Escape HTML in code content
+    import html
+    escaped_content = html.escape(content)
+    
     self.body.append(
-        f'<div class="pitch-code-widget" data-language="{language}"><pre><code>'
+        f'<div class="pitch-code-widget" data-language="{language}"><pre><code class="language-{language}">'
     )
+    if escaped_content:
+        self.body.append(escaped_content)
 
 
 def depart_code_widget_node(self, node):
@@ -266,9 +340,9 @@ class PitchDirective(SphinxDirective):
                 slide_node += grid_node
             # Check for @code widget
             elif line.strip().startswith("@code["):
-                widget_node = self._parse_code_widget(line)
-                slide_node += widget_node
-                i += 1
+                code_lines, i = self._extract_code_widget(lines, i)
+                code_node = self._create_code_widget(code_lines)
+                slide_node += code_node
             # Check for @ul/@ol widget
             elif line.strip().startswith("@ul") or line.strip().startswith("@ol"):
                 list_content, list_type, i = self._extract_list_widget(lines, i)
@@ -343,7 +417,69 @@ class PitchDirective(SphinxDirective):
 
         return grid_node
 
-    def _parse_code_widget(self, line):
+    def _extract_code_widget(self, lines, start_idx):
+        """Extract @code widget content (inline or file reference)."""
+        header_line = lines[start_idx]
+        
+        # Parse attributes from header
+        match = re.match(r'@code\[([^\]]*)\]', header_line)
+        attrs = {}
+        file_path = None
+        
+        if match:
+            attr_str = match.group(1)
+            # Check if there's a file path: @code[attrs](path)
+            path_match = re.search(r'\]\(([^)]+)\)', header_line)
+            if path_match:
+                file_path = path_match.group(1)
+            
+            # Parse attributes
+            for pair in attr_str.split(','):
+                pair = pair.strip()
+                if '=' in pair:
+                    key, value = pair.split('=', 1)
+                    attrs[key.strip()] = value.strip()
+                elif pair and not file_path:
+                    # First non-key-value is language
+                    attrs['language'] = pair
+        
+        content_lines = []
+        i = start_idx + 1
+        
+        if file_path:
+            # External file reference - no inline content
+            attrs['path'] = file_path
+        else:
+            # Inline code - collect until next special element or empty line
+            while i < len(lines):
+                line = lines[i]
+                if not line.strip():
+                    i += 1
+                    break
+                if line.strip().startswith('@') or line.strip().startswith('[') or line.strip().startswith('---'):
+                    break
+                if line.strip().startswith('Note:'):
+                    break
+                content_lines.append(line)
+                i += 1
+        
+        return {'attrs': attrs, 'content': '\n'.join(content_lines)}, i
+
+    def _create_code_widget(self, data):
+        """Create a code widget node from parsed data."""
+        node = CodeWidgetNode()
+        node['attrs'] = data['attrs']
+        node['content'] = data['content']
+        
+        # Add code content as text node
+        if data['content']:
+            text_node = nodes.literal_block(text=data['content'])
+            text_node['language'] = data['attrs'].get('language', 'text')
+            node += text_node
+        
+        return node
+
+    def _parse_code_widget_old(self, line):
         """Parse @code[language](path) syntax."""
         node = CodeWidgetNode()
 
@@ -405,17 +541,19 @@ class PitchDirective(SphinxDirective):
         for line in content_lines:
             line = line.strip()
             if line.startswith("- ") or line.startswith("* "):
-                # Create list item node
+                # Create list item node with paragraph
                 item_node = nodes.list_item()
-                text_node = nodes.Text(line[2:])
-                item_node += text_node
+                para = nodes.paragraph()
+                para += nodes.Text(line[2:])
+                item_node += para
                 node += item_node
             elif re.match(r"^\d+\.\s", line):
                 # Ordered list item
                 item_node = nodes.list_item()
+                para = nodes.paragraph()
                 text = re.sub(r"^\d+\.\s", "", line)
-                text_node = nodes.Text(text)
-                item_node += text_node
+                para += nodes.Text(text)
+                item_node += para
                 node += item_node
 
         return node
