@@ -24,3 +24,25 @@
     font-weight: bold;
     margin-bottom: 20px;
 }
+
+.pitch-subtitle {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #eee;
+}
+
+.pitch-grid {
+    box-sizing: border-box;
+    padding: 20px;
+    overflow: auto;
+}
+
+.pitch-grid .pitch-subtitle {
+    margin-top: 0;
+}
+
+.pitch-list-item {
+    margin: 5px 0;
+    line-height: 1.6;
+}
