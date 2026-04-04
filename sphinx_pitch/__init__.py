@@ -57,10 +57,66 @@ class PitchNoteNode(nodes.General, nodes.Element):
 # Visitor functions for HTML output (standard Sphinx HTML)
 def visit_pitch_node(self, node):
     self.body.append('<div class="pitch-presentation">')
+    self.body.append('<div class="pitch-slides">')
 
 
 def depart_pitch_node(self, node):
-    self.body.append("</div>")
+    self.body.append("</div>")  # Close pitch-slides
+
+    # Add navigation controls with JavaScript
+    self.body.append("""
+<div class="pitch-controls">
+    <button class="pitch-prev" onclick="pitchNavigate(-1)">← Previous</button>
+    <span class="pitch-slide-number">1 / 1</span>
+    <button class="pitch-next" onclick="pitchNavigate(1)">Next →</button>
+</div>
+<script>
+(function() {
+    const presentation = document.currentScript.closest('.pitch-presentation');
+    const slides = presentation.querySelectorAll('.pitch-slide');
+    const slideNumber = presentation.querySelector('.pitch-slide-number');
+    const prevBtn = presentation.querySelector('.pitch-prev');
+    const nextBtn = presentation.querySelector('.pitch-next');
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    
+    function updateSlides() {
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === currentSlide);
+        });
+        if (slideNumber) {
+            slideNumber.textContent = (currentSlide + 1) + ' / ' + totalSlides;
+        }
+        if (prevBtn) prevBtn.disabled = currentSlide === 0;
+        if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+    
+    window.pitchNavigate = function(direction) {
+        const newSlide = currentSlide + direction;
+        if (newSlide >= 0 && newSlide < totalSlides) {
+            currentSlide = newSlide;
+            updateSlides();
+        }
+    };
+    
+    document.addEventListener('keydown', function(e) {
+        const isPresentationVisible = presentation.getBoundingClientRect().top < window.innerHeight && 
+                                     presentation.getBoundingClientRect().bottom > 0;
+        if (!isPresentationVisible) return;
+        
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            pitchNavigate(-1);
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+            e.preventDefault();
+            pitchNavigate(1);
+        }
+    });
+    
+    updateSlides();
+})();
+</script>
+</div>""")
 
 
 def visit_pitch_slide_node(self, node):
