@@ -10,17 +10,7 @@ A Sphinx extension for creating presentations with **GitPitch-compatible syntax*
 
 sphinx-pitch allows you to create beautiful slide presentations using Sphinx and reStructuredText with **GitPitch-compatible markdown syntax**. It brings the power of GitPitch's presentation features to the Sphinx ecosystem.
 
-## Features
-
-- **GitPitch-Compatible Syntax** - Use familiar PITCHME.md-style syntax
-- **Grid Layouts** - Position content with pixel-perfect drag/drop syntax
-- **Code Presenting** - Highlight and present code with syntax highlighting
-- **List Widgets** - Create styled lists with animations
-- **Math Formulas** - Display mathematical notation with LaTeX support
-- **Speaker Notes** - Add private notes for presenters
-- **Responsive Design** - Works on desktop and mobile devices
-
-## Installation
+## Install
 
 ```bash
 pip install sphinx-pitch
@@ -34,7 +24,7 @@ cd sphinx-pitch
 pip install -e .
 ```
 
-## Quick Start
+## Usage
 
 1. Add `sphinx_pitch` to your Sphinx `conf.py`:
 
@@ -75,6 +65,16 @@ extensions = [
 ```bash
 make html
 ```
+
+## Features
+
+- **GitPitch-Compatible Syntax** - Use familiar PITCHME.md-style syntax
+- **Grid Layouts** - Position content with pixel-perfect drag/drop syntax
+- **Code Presenting** - Highlight and present code with syntax highlighting
+- **List Widgets** - Create styled lists with animations
+- **Math Formulas** - Display mathematical notation with LaTeX support
+- **Speaker Notes** - Add private notes for presenters
+- **Responsive Design** - Works on desktop and mobile devices
 
 ## Syntax Reference
 
