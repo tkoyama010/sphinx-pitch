@@ -1,42 +1,21 @@
-Hello World
-===========
-
 .. pitch::
 
-   # Hello World
-   
-   Welcome to sphinx-pitch!
+   # Welcome to sphinx-pitch!
 
-   ---
-
-   # Grid Layout Example
-   
-   [drag=48 80, drop=left, bg=#e74c3c]
+   [drag=48% 40%, drop=0 120px, bg=#e74c3c]
    
    ## Left Content
    
-   This content appears on the left side
+   left side with grid
    
-   [drag=48 80, drop=right, bg=#3498db]
+   [drag=48% 40%, drop=400px 120px, bg=#3498db]
    
    ## Right Content
    
-   This content appears on the right side
-
-   ---
-
-   # Advanced Layout
+   right side
    
-   [drag=65 90, drop=left, flow=stack, sync=true, bg=#2ecc71]
+   [drag=300px 250px, drop=100px 300px, bg=#2ecc71]
    
-   ## Main Content Area
+   ## Free Position
    
-   - Feature 1
-   - Feature 2
-   - Feature 3
-   
-   [drag=33 90, drop=right, bg=#9b59b6]
-   
-   ## Sidebar
-   
-   Additional information here
+   This content is at 100px 300px

@@ -22,8 +22,10 @@ class PitchGridNode(nodes.General, nodes.Element):
 
 
 # Regex to parse [drag=WIDTH HEIGHT, drop=POSITION, ...] syntax
+# Supports: drag=100px 200px or drag=50% 80% (default: %)
+# Supports: drop=left/right/top/bottom/center or drop=100px 200px
 DRAG_PATTERN = re.compile(
-    r"\[drag=(\d+)\s+(\d+)(?:,\s*drop=(\w+))?(?:,\s*flow=(\w+))?(?:,\s*sync=(\w+))?(?:,\s*bg=([#\w]+))?\]"
+    r"\[drag=(\d+)(px|%)?\s+(\d+)(px|%)?(?:,\s*drop=(?:(left|right|top|bottom|center)|(\d+)(px|%)?\s+(\d+)(px|%)?))?(?:,\s*flow=(\w+))?(?:,\s*sync=(\w+))?(?:,\s*bg=([#\w]+))?\]"
 )
 
 
@@ -65,12 +67,40 @@ class PitchDirective(SphinxDirective):
                 drag_match = DRAG_PATTERN.match(stripped)
                 if drag_match:
                     # Parse grid parameters
-                    width = drag_match.group(1)
-                    height = drag_match.group(2)
-                    position = drag_match.group(3) or "left"
-                    flow = drag_match.group(4) or ""
-                    sync = drag_match.group(5) or ""
-                    bg = drag_match.group(6) or ""
+                    width_val = drag_match.group(1)
+                    width_unit = drag_match.group(2) or "%"
+                    height_val = drag_match.group(3)
+                    height_unit = drag_match.group(4) or "%"
+
+                    # Build width/height with units
+                    width = f"{width_val}{width_unit}"
+                    height = f"{height_val}{height_unit}"
+
+                    # Parse drop - either keyword or coordinates
+                    drop_keyword = drag_match.group(5)
+                    drop_x_val = drag_match.group(6)
+                    drop_x_unit = drag_match.group(7) or "px"
+                    drop_y_val = drag_match.group(8)
+                    drop_y_unit = drag_match.group(9) or "px"
+
+                    if drop_keyword:
+                        # Using keyword position
+                        position = drop_keyword
+                        drop_x = None
+                        drop_y = None
+                    elif drop_x_val and drop_y_val:
+                        # Using pixel/percentage coordinates
+                        position = "coords"
+                        drop_x = f"{drop_x_val}{drop_x_unit}"
+                        drop_y = f"{drop_y_val}{drop_y_unit}"
+                    else:
+                        position = "left"
+                        drop_x = None
+                        drop_y = None
+
+                    flow = drag_match.group(10) or ""
+                    sync = drag_match.group(11) or ""
+                    bg = drag_match.group(12) or ""
 
                     # Collect grid content until next drag directive or end of slide
                     grid_content = []
@@ -91,6 +121,8 @@ class PitchDirective(SphinxDirective):
                     grid["width"] = width
                     grid["height"] = height
                     grid["position"] = position
+                    grid["drop_x"] = drop_x or ""
+                    grid["drop_y"] = drop_y or ""
                     grid["flow"] = flow
                     grid["sync"] = sync
                     grid["bg"] = bg
@@ -178,43 +210,46 @@ def depart_pitch_slide_node(self, node):
 
 
 def visit_pitch_grid_node(self, node):
-    width = node.get("width", "50")
-    height = node.get("height", "50")
+    width = node.get("width", "50%")
+    height = node.get("height", "50%")
     position = node.get("position", "left")
+    drop_x = node.get("drop_x", "")
+    drop_y = node.get("drop_y", "")
     flow = node.get("flow", "")
     sync = node.get("sync", "")
     bg = node.get("bg", "")
 
-    # Calculate CSS properties based on position
-    if position == "left":
-        left = "0"
-        right = "auto"
-    elif position == "right":
-        left = "auto"
-        right = "0"
-    elif position == "top":
-        left = "0"
-        right = "auto"
-    elif position == "bottom":
-        left = "0"
-        right = "auto"
-    else:
-        left = "0"
-        right = "auto"
-
     # Build style attribute
     styles = [
-        f"width: {width}%",
-        f"height: {height}%",
+        f"width: {width}",
+        f"height: {height}",
         f"position: absolute",
-        f"left: {left}",
     ]
 
-    if right != "auto":
-        styles.append(f"right: {right}")
-
-    if position in ["top", "bottom"]:
-        styles.append(f"{position}: 0")
+    # Calculate position
+    if position == "coords" and drop_x and drop_y:
+        # Pixel/percentage coordinates
+        styles.append(f"left: {drop_x}")
+        styles.append(f"top: {drop_y}")
+    elif position == "left":
+        styles.append("left: 0")
+        styles.append("top: 0")
+    elif position == "right":
+        styles.append("right: 0")
+        styles.append("top: 0")
+    elif position == "top":
+        styles.append("left: 0")
+        styles.append("top: 0")
+    elif position == "bottom":
+        styles.append("left: 0")
+        styles.append("bottom: 0")
+    elif position == "center":
+        styles.append("left: 50%")
+        styles.append("top: 50%")
+        styles.append("transform: translate(-50%, -50%)")
+    else:
+        styles.append("left: 0")
+        styles.append("top: 0")
 
     if flow == "stack":
         styles.append("display: flex")
