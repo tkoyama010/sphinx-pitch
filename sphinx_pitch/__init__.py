@@ -209,16 +209,21 @@ show();
 
 def visit_pitch_slide_node(self, node):
     grid_size = node.get("grid", "")
-    # Add grid data attribute and CSS custom property
+    # Add grid overlay element if grid_size is set
     if grid_size:
+        grid_overlay = f'<div class="pitch-grid-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; background-image: radial-gradient(circle, rgba(255,255,255,0.8) 2px, transparent 2px); background-size: {grid_size}px {grid_size}px;"></div>'
         self.body.append(
-            f'<section class="pitch-slide" id="{node["slide_id"]}" data-grid-size="{grid_size}" style="--grid-size: {grid_size}px;">'
+            f'<section class="pitch-slide" id="{node["slide_id"]}">{grid_overlay}'
         )
     else:
         self.body.append(f'<section class="pitch-slide" id="{node["slide_id"]}">')
 
 
 def depart_pitch_slide_node(self, node):
+    grid_size = node.get("grid", "")
+    # Close grid overlay div if it was added
+    if grid_size:
+        self.body.append("</div>")
     self.body.append("</section>")
 
 
