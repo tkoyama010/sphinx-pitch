@@ -8,7 +8,7 @@
    
    left side with grid
    
-   [drag=48% 40%, drop=right, bg=#3498db]
+   [drag=48% 40%, drop=0px 100px, bg=#3498db]
    
    ## Right Content
    
