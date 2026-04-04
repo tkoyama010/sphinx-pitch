@@ -31,6 +31,7 @@ version = __version__
 
 # Add any Sphinx extension module names here, as strings.
 extensions = [
+    "sphinx_revealjs",
     "sphinx_pitch",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",

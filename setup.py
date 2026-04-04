@@ -35,6 +35,7 @@ setup(
     install_requires=[
         "sphinx>=3.0",
         "docutils>=0.16",
+        "sphinx-revealjs>=2.0",
     ],
     extras_require={
         "dev": [
