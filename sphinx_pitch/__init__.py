@@ -133,7 +133,7 @@ def depart_pitch_node(self, node):
     document.querySelectorAll('.pitch-slides-container').forEach(initPitchPresentation);
 })();
 </script>
-''')
+""")
     self.body.append("</div>")  # Close presentation
 
 
@@ -225,11 +225,12 @@ def visit_code_widget_node(self, node):
     attrs = node.get("attrs", {})
     language = attrs.get("language", "text")
     content = node.get("content", "")
-    
+
     # Escape HTML in code content
     import html
+
     escaped_content = html.escape(content)
-    
+
     self.body.append(
         f'<div class="pitch-code-widget" data-language="{language}"><pre><code class="language-{language}">'
     )
@@ -420,35 +421,35 @@ class PitchDirective(SphinxDirective):
     def _extract_code_widget(self, lines, start_idx):
         """Extract @code widget content (inline or file reference)."""
         header_line = lines[start_idx]
-        
+
         # Parse attributes from header
-        match = re.match(r'@code\[([^\]]*)\]', header_line)
+        match = re.match(r"@code\[([^\]]*)\]", header_line)
         attrs = {}
         file_path = None
-        
+
         if match:
             attr_str = match.group(1)
             # Check if there's a file path: @code[attrs](path)
-            path_match = re.search(r'\]\(([^)]+)\)', header_line)
+            path_match = re.search(r"\]\(([^)]+)\)", header_line)
             if path_match:
                 file_path = path_match.group(1)
-            
+
             # Parse attributes
-            for pair in attr_str.split(','):
+            for pair in attr_str.split(","):
                 pair = pair.strip()
-                if '=' in pair:
-                    key, value = pair.split('=', 1)
+                if "=" in pair:
+                    key, value = pair.split("=", 1)
                     attrs[key.strip()] = value.strip()
                 elif pair and not file_path:
                     # First non-key-value is language
-                    attrs['language'] = pair
-        
+                    attrs["language"] = pair
+
         content_lines = []
         i = start_idx + 1
-        
+
         if file_path:
             # External file reference - no inline content
-            attrs['path'] = file_path
+            attrs["path"] = file_path
         else:
             # Inline code - collect until next special element or empty line
             while i < len(lines):
@@ -456,27 +457,31 @@ class PitchDirective(SphinxDirective):
                 if not line.strip():
                     i += 1
                     break
-                if line.strip().startswith('@') or line.strip().startswith('[') or line.strip().startswith('---'):
+                if (
+                    line.strip().startswith("@")
+                    or line.strip().startswith("[")
+                    or line.strip().startswith("---")
+                ):
                     break
-                if line.strip().startswith('Note:'):
+                if line.strip().startswith("Note:"):
                     break
                 content_lines.append(line)
                 i += 1
-        
-        return {'attrs': attrs, 'content': '\n'.join(content_lines)}, i
+
+        return {"attrs": attrs, "content": "\n".join(content_lines)}, i
 
     def _create_code_widget(self, data):
         """Create a code widget node from parsed data."""
         node = CodeWidgetNode()
-        node['attrs'] = data['attrs']
-        node['content'] = data['content']
-        
+        node["attrs"] = data["attrs"]
+        node["content"] = data["content"]
+
         # Add code content as text node
-        if data['content']:
-            text_node = nodes.literal_block(text=data['content'])
-            text_node['language'] = data['attrs'].get('language', 'text')
+        if data["content"]:
+            text_node = nodes.literal_block(text=data["content"])
+            text_node["language"] = data["attrs"].get("language", "text")
             node += text_node
-        
+
         return node
 
     def _parse_code_widget_old(self, line):
