@@ -1,16 +1,16 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.10
+    rev: v0.15.13
     hooks:
       - id: ruff-check
         args: ["--fix", "--show-fixes"]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.1
+    rev: v2.1.0
     hooks:
       - id: mypy
         additional_dependencies: [types-docutils]
   - repo: https://github.com/tkoyama010/standard-readme-pre-commit
-    rev: 810adb53324d6891fc270081b58e21db67fdafcb
+    rev: 8a8642b27b2d8dad2413a7df7eb5c8c1c635d0a2
     hooks:
       - id: standard-readme
