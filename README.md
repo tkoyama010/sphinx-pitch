@@ -27,7 +27,7 @@ Add `sphinx_pitch` to your Sphinx `conf.py`:
 
 ```python
 extensions = [
-    'sphinx_pitch',
+    "sphinx_pitch",
 ]
 ```
 
